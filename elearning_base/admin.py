@@ -17,7 +17,7 @@ class EnrollmentsAdmin(admin.ModelAdmin):
     list_display = ('enrollment_id', 'course', 'student')
 
 class CourseActivityAdmin(admin.ModelAdmin):
-    list_display = ('activity_id', 'course', 'activity_title', 'description', 'course_activity_type', 'deadline')
+    list_display = ('activity_id', 'course', 'activity_title', 'description', 'activity_type', 'created_at', 'updated_at', 'deadline')
 
 class CourseActivityMaterialAdmin(admin.ModelAdmin):
     list_display = ('material_id', 'material_title', 'description', 'course_activity', 'file', 'video_link', 'image')
