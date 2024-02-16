@@ -2,7 +2,18 @@
 {% load static %}
 
 {% block content %}
-<div>
-    <h1>Welcome to Elearn!</h1>
-</div>
+
+{% if user.is_teacher %}
+    <h1>Welcome to Elearn, Teacher {{ user.username }}!</h1>
+{% else %}
+    <h1>Welcome to Elearn, Student {{ user.username }}!</h1>
+{% endif %}
+
+{% if user.is_authenticated %}
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+{% endif %}
+
 {% endblock %}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import *
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LogoutView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import json
@@ -24,8 +25,8 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
+                #next_url = request.GET.get('next', 'home')
+                return redirect('home')
     else:
         form = CustomAuthenticationForm()
     return render(request, 'elearning_base/login.html', {'form': form})
@@ -43,8 +44,9 @@ def register_view(request):
         form = UserForm()
         return render(request, 'elearning_base/register.html', {'form': form})
 
-def logout_view(request):
-    pass
+#Overriding the default logout view to redirect to login page after logout
+class LogoutView(LogoutView):
+    next_page = 'login'
 
 def password_reset_view(request):
     pass
