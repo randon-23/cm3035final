@@ -1,6 +1,6 @@
 from django import forms
 from .models import UserProfile
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class UserForm(UserCreationForm):
     username = forms.CharField(max_length=100, required=True, label='Your Username')
@@ -9,10 +9,14 @@ class UserForm(UserCreationForm):
     password2 = forms.CharField(widget=forms.PasswordInput, required=True, label='Confirm Password')
     first_name = forms.CharField(max_length=100, required=True, label='First Name')
     last_name = forms.CharField(max_length=100, required=True, label='Last Name')
-    is_teacher = forms.BooleanField(required=True)
-    date_of_birth = forms.DateField(required=True)
-    bio = forms.CharField(max_length=500, required=False)
-    profile_img = forms.ImageField(required=False)
+    is_teacher = forms.BooleanField(required=False, label='Are you a teacher?', initial=False)
+    date_of_birth = forms.DateField(
+        required=True,
+        label='Date of Birth',
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    bio = forms.CharField(max_length=500, required=False,  label='Bio')
+    profile_img = forms.ImageField(required=False, label='Profile Image')
     
     class Meta:
         model = UserProfile
@@ -24,3 +28,36 @@ class UserForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+    
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get("date_of_birth")
+        if dob.year < 1900 or dob.year > 2021:
+            raise forms.ValidationError("Invalid/unreasonable date of birth")
+        return dob
+    
+    #Customising user creation (Registration) form
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            if fieldname == 'is_teacher':
+                field.widget.attrs.update({
+                    'class': 'form-checkbox h-5 w-5 text-gray-600',
+                })
+                field.label = field.label + ' (Required)' if field.required else field.label
+            else:
+                field.widget.attrs.update({
+                    'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                    'placeholder': field.label + ' (Required)' if field.required else field.label
+                })
+                field.label = ''
+                
+class CustomAuthenticationForm(AuthenticationForm):
+    #Customising authentication form for login
+    def __init__(self, *args, **kwargs):
+        super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                'placeholder': field.label
+            })
+            field.label = ''

@@ -9,7 +9,7 @@ class UserPasswordValidator:
             raise ValidationError(self.get_help_text())
         if not re.search(r'[0-9]', password):
             raise ValidationError(self.get_help_text())
-        if not re.search(r'[@#$%^&+=]', password):
+        if not re.search(r'[@#$%^&+=!*]', password):
             raise ValidationError(self.get_help_text())
         
     def get_help_text(self):

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
@@ -19,6 +20,19 @@ class UserProfile(AbstractUser):
     def clean(self):
         if '@' not in self.email:
             raise ValidationError("Invalid email format")
+        
+    def save(self, *args, **kwargs):
+        super(UserProfile, self).save(*args, **kwargs)
+        
+        Group.objects.get_or_create(name='Students')
+        Group.objects.get_or_create(name='Teachers')
+
+        if self.is_teacher:
+            teachers = Group.objects.get(name='Teachers')
+            self.groups.add(teachers)
+        else:
+            students = Group.objects.get(name='Students')
+            self.groups.add(students)
 
 class Course(models.Model):
     course_id = models.AutoField(primary_key=True)
@@ -54,10 +68,22 @@ class CourseTag(models.Model):
 
 # Bridge table for the many-to-many relationship between UserProfile and Course
 class Enrollments(models.Model):
+    ACTIVE = 'Active'
+    INACTIVE = 'Inactive'
+    COMPLETE = 'Complete'
+    BLOCKED = 'Blocked'
+
+    ENROLLMENT_STATUSES = [
+        (ACTIVE, 'Active'),
+        (INACTIVE, 'Inactive'),
+        (COMPLETE, 'Complete'),
+        (BLOCKED, 'Blocked')
+    ]
     enrollment_id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     student = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, blank=False, null=False, choices=ENROLLMENT_STATUSES, default='Active')
     blocked = models.BooleanField(default=False, null=False, blank=False)
 
     def __str__(self):
@@ -66,6 +92,18 @@ class Enrollments(models.Model):
     def clean(self):
         if self.student.is_teacher == True:
             raise ValidationError("Only students can enroll in courses")
+        
+        valid_statuses = {choice[0] for choice in self.ENROLLMENT_STATUSES}
+        if self.status not in valid_statuses:
+            raise ValueError({'status': "Invalid status."})
+    
+    def save(self, *args, **kwargs):
+        if self.blocked and self.status != self.BLOCKED:
+            self.status = self.BLOCKED
+        super(Enrollments, self).save(*args, **kwargs)
+    
+    class Meta:
+        unique_together = ('course', 'student')
 
 class CourseActivity(models.Model):
     LECTURE = 'LECTURE'

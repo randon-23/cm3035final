@@ -3,6 +3,7 @@ from django.db import IntegrityError, transaction
 from .models import *
 from datetime import date, datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.conf import settings
 import os
@@ -40,7 +41,7 @@ class TestUserProfile(TestCase):
             
     def test_unique_email(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
-            UserProfile.objects.create(username='teacher2', email='teacher1@gmail.com', is_teacher=True)
+            UserProfile.objects.create(username='teacher2', email='teacher2@gmail.com', is_teacher=True)
     
     def test_user_default_values(self):
         user2 = UserProfile.objects.create(username='user2', email='user2@gmail.com')
@@ -82,6 +83,22 @@ class TestUserProfile(TestCase):
         self.student.profile_img = self.image
         self.student.save()
         self.assertTrue(self.student.profile_img)
+
+#Test proper group assignment upon user save
+class TestUserGroupAssignmentUponSave(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.teacher, cls.student = create_common_objects()
+        Group.objects.get_or_create(name='Students')
+        Group.objects.get_or_create(name='Teachers')
+    
+    def test_teacher_group_assignment(self):
+        self.teacher.save()
+        self.assertTrue(self.teacher.groups.filter(name='Teachers').exists())
+    
+    def test_student_group_assignment(self):
+        self.student.save()
+        self.assertTrue(self.student.groups.filter(name='Students').exists())
 
 #Test for Course model
 class TestCourse(TestCase):
@@ -188,6 +205,31 @@ class TestEnrollments(TestCase):
 
     def test_string_representation(self):
         self.assertEqual(str(self.enrollment), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\n\nCourse Title: Course1")
+
+    def test_uniqueness_together(self):
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Enrollments.objects.create(course=self.course, student=self.student)
+    
+    def test_status_default_active(self):
+        self.assertEqual(self.enrollment.status, 'Active')
+    
+    def test_valid_status_choices(self):
+        self.enrollment.status = 'Inactive'
+        self.enrollment.save()
+        self.assertEqual(self.enrollment.status, 'Inactive')
+
+        self.enrollment.status = 'Complete'
+        self.enrollment.save()
+        self.assertEqual(self.enrollment.status, 'Complete')
+
+        self.enrollment.status = 'Blocked'
+        self.enrollment.save()
+        self.assertEqual(self.enrollment.status, 'Blocked')
+    
+    def test_invalid_status_choices(self):
+        with self.assertRaises(ValueError):
+            self.enrollment.status = 'PENDING'
+            self.enrollment.clean()
 
 #Test for CourseActivity
 class TestCourseActivity(TestCase):
