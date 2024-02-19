@@ -1,5 +1,5 @@
 from django import forms
-from .models import UserProfile
+from .models import UserProfile, StatusUpdate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class UserForm(UserCreationForm):
@@ -61,3 +61,34 @@ class CustomAuthenticationForm(AuthenticationForm):
                 'placeholder': field.label
             })
             field.label = ''
+
+class UserProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'email', 'date_of_birth', 'bio', 'profile_img']
+
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get("date_of_birth")
+        if dob.year < 1900 or dob.year > 2021:
+            raise forms.ValidationError("Invalid/unreasonable date of birth")
+        return dob
+    
+    def __init__(self, *args, **kwargs):
+        super(UserProfileUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['date_of_birth'].widget = forms.DateInput(attrs={'type': 'date', 'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white', 'placeholder': 'Date of Birth'})
+        
+        for fieldname, field in self.fields.items():
+            if fieldname != 'date_of_birth':  # Skip 'date_of_birth' since it's already handled
+                field.widget.attrs.update({
+                    'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                    'placeholder': field.label
+                })
+            field.label = ''
+
+class StatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = StatusUpdate
+        fields = ['status']
+        widgets = {
+            'status': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s up?'}),
+        } 

@@ -4,9 +4,11 @@ from .models import *
 from datetime import date, datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import Group
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.conf import settings
 import os
+import shutil
 
 # Create common objects for testing
 def create_common_objects():
@@ -22,6 +24,17 @@ class TestUserProfile(TestCase):
         cls.teacher, cls.student = create_common_objects()
         with open(image_path, 'rb') as f:
             cls.image = SimpleUploadedFile("profile1.jpg", content=f.read(), content_type='image/jpeg')
+
+    @classmethod
+    def tearDownClass(self):
+        super().tearDownClass()
+        user_1_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_1')
+        user_2_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_2')
+
+        if os.path.exists(user_1_dir):
+            shutil.rmtree(user_1_dir)
+        if os.path.exists(user_2_dir):
+            shutil.rmtree(user_2_dir)
     
     def test_teacher_user_creation(self):
         self.assertEqual(self.teacher.username, 'teacher1')
@@ -41,7 +54,7 @@ class TestUserProfile(TestCase):
             
     def test_unique_email(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
-            UserProfile.objects.create(username='teacher2', email='teacher2@gmail.com', is_teacher=True)
+            UserProfile.objects.create(username='teacher2', email='teacher1@gmail.com', is_teacher=True)
     
     def test_user_default_values(self):
         user2 = UserProfile.objects.create(username='user2', email='user2@gmail.com')
@@ -75,7 +88,7 @@ class TestUserProfile(TestCase):
         #TO TEST FOR VALIDATION ERROS DUE TO INCORRECT FORMATS YOU WOULD TYPICALLY DO THIS IN FORM TESTS
         #OR MODEL CLEAN METHODS 
 
-    def test_user_profile_img(self):
+    def test_user_profile_img_and_stored_path(self):
         self.teacher.profile_img = self.image
         self.teacher.save()
         self.assertTrue(self.teacher.profile_img)
@@ -83,6 +96,14 @@ class TestUserProfile(TestCase):
         self.student.profile_img = self.image
         self.student.save()
         self.assertTrue(self.student.profile_img)
+
+    def test_user_profile_img_path(self):
+        self.teacher.profile_img.save('profile2.jpg', self.image, save=True)
+        expected_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'profile_imgs', f'user_{self.teacher.user_id}', 'profile2.jpg'))
+        actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, self.teacher.profile_img.name))
+
+        self.assertEqual(expected_path, actual_path)
+        self.assertTrue(os.path.exists(actual_path))
 
 #Test proper group assignment upon user save
 class TestUserGroupAssignmentUponSave(TestCase):
@@ -92,6 +113,12 @@ class TestUserGroupAssignmentUponSave(TestCase):
         Group.objects.get_or_create(name='Students')
         Group.objects.get_or_create(name='Teachers')
     
+    @classmethod
+    def tearDownClass(self):
+        Group.objects.get(name='Students').delete()
+        Group.objects.get(name='Teachers').delete()
+        super().tearDownClass()
+
     def test_teacher_group_assignment(self):
         self.teacher.save()
         self.assertTrue(self.teacher.groups.filter(name='Teachers').exists())
@@ -106,17 +133,25 @@ class TestCourse(TestCase):
     def setUpTestData(cls):
         image_path = os.path.join(settings.BASE_DIR, 'elearning_base', 'test_files', 'course1.jpg')
         cls.teacher, cls.student = create_common_objects()
+        cls.course = Course.objects.create(course_title='Course1', description='This is course 1', teacher=cls.teacher)
         with open(image_path, 'rb') as f:
             cls.image = SimpleUploadedFile("course1.jpg", content=f.read(), content_type='image/jpeg')    
-        cls.course = Course.objects.create(course_title='Course1', description='This is course 1', teacher=cls.teacher, course_img=cls.image)
-        
+    
+    @classmethod
+    def tearDownClass(self):
+        super().tearDownClass()
+        course_1_dir = os.path.join(settings.MEDIA_ROOT, 'course_imgs', 'course_1')
+
+        if os.path.exists(course_1_dir):
+            shutil.rmtree(course_1_dir)
+
     def test_course_creation(self):
         self.assertEqual(self.course.course_title, 'Course1')
         self.assertEqual(self.course.description, 'This is course 1')
         self.assertEqual(self.course.teacher, self.teacher)
 
     def test_course_str_representation(self):
-        self.assertEqual(str(self.course), "Course Title: Course1")
+        self.assertEqual(str(self.course), "Course1")
     
     def test_course_creation_by_student(self):
         with self.assertRaises(ValidationError):
@@ -146,7 +181,14 @@ class TestCourse(TestCase):
         self.assertNotEqual(self.course.description, 'This is course 1') 
 
     def test_course_img(self):
+        self.course.course_img.save('course1.jpg', self.image, save=True)
         self.assertTrue(self.course.course_img)
+
+        expected_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'course_imgs', f'course_{self.course.course_id}', 'course1.jpg'))
+        actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, self.course.course_img.name))
+        
+        self.assertEqual(expected_path, actual_path)
+        self.assertTrue(os.path.exists(actual_path))
 
 #Test for Tag model
 class TestTag(TestCase):
@@ -168,6 +210,11 @@ class TestCourseTag(TestCase):
         cls.tag = Tag.objects.create(tag_name="Web Development")
         cls.course_tag=CourseTag.objects.create(course=cls.course, tag=cls.tag)
 
+    @classmethod
+    def tearDownClass(self):
+        Tag.objects.get(tag_name="Web Development").delete()
+        super().tearDownClass()
+
     def test_creation(self):
         self.assertEqual(self.course_tag.course, self.course)
         self.assertEqual(self.course_tag.tag, self.tag)
@@ -177,7 +224,7 @@ class TestCourseTag(TestCase):
             CourseTag.objects.create(course=self.course, tag=self.tag)
     
     def test_string_representation(self):
-        self.assertEqual(str(self.course_tag), "Course Title: Web Dev\nTag: Web Development")
+        self.assertEqual(str(self.course_tag), "Web Dev\nTag: Web Development")
 
 #Test for Enrollments model
 class TestEnrollments(TestCase):
@@ -204,7 +251,7 @@ class TestEnrollments(TestCase):
         self.assertIsInstance(self.enrollment.enrolled_at, datetime)
 
     def test_string_representation(self):
-        self.assertEqual(str(self.enrollment), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\n\nCourse Title: Course1")
+        self.assertEqual(str(self.enrollment), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\n\nCourse1")
 
     def test_uniqueness_together(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
@@ -265,7 +312,7 @@ class TestCourseActivity(TestCase):
             CourseActivity.objects.create(course=self.course, activity_title='Lecture 1', description='Attempting to violate unique pairing constraint')
 
     def test_string_representation(self):
-        self.assertEqual(str(self.lecture), "Course Title: Course1\nActivity Title: Lecture 1")
+        self.assertEqual(str(self.lecture), "Course1\nActivity Title: Lecture 1")
 
     def test_deadline_past(self):
         with self.assertRaises(ValidationError):
@@ -293,6 +340,14 @@ class TestCourseActivityMaterial(TestCase):
         cls.lecture = CourseActivity.objects.create(course=cls.course, activity_title='Lecture 1', description='This is lecture 1')
         cls.material = CourseActivityMaterial.objects.create(material_title='Material 1', description='This is material 1', course_activity=cls.lecture)
     
+    @classmethod
+    #tearDownClass to remove files used across multiple directories
+    def tearDownClass(self):
+        super().tearDownClass()
+        material_1_dir = os.path.join(settings.MEDIA_ROOT, 'course_files', 'course_1')
+        if os.path.exists(material_1_dir):
+            shutil.rmtree(material_1_dir)
+
     def test_creation(self):
         self.assertEqual(self.material.material_title, 'Material 1')
         self.assertEqual(self.material.description, 'This is material 1')
@@ -301,7 +356,7 @@ class TestCourseActivityMaterial(TestCase):
         self.assertEqual(self.material.updated_at, self.material.created_at)
 
     def test_string_representation(self):
-        self.assertEqual(str(self.material), "Course Title: Course1\nActivity Title: Lecture 1\nMaterial Title: Material 1")
+        self.assertEqual(str(self.material), "Course1\nActivity Title: Lecture 1\nMaterial Title: Material 1")
     
     def test_file_upload(self):
         file_path=os.path.join(settings.BASE_DIR, 'elearning_base', 'test_files', 'test1.pdf')
@@ -310,6 +365,12 @@ class TestCourseActivityMaterial(TestCase):
             self.material.save()
             self.assertTrue(self.material.file)
     
+        expected_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'course_files', f'course_{self.material.course_activity.course.course_id}', f'activity_{self.material.course_activity.activity_id}', 'files', 'test1.pdf'))
+        actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, self.material.file.name))
+        
+        self.assertEqual(expected_path, actual_path)
+        self.assertTrue(os.path.exists(actual_path))
+
     def test_foreign_key_deletion(self):
         self.lecture.delete()
         self.assertFalse(CourseActivityMaterial.objects.filter(material_id=self.material.material_id).exists())
@@ -338,6 +399,16 @@ class TestSubmission(TestCase):
         cls.course = Course.objects.create(course_title='Course1', description='This is course 1', teacher=cls.teacher)
         cls.course_activity = CourseActivity.objects.create(course=cls.course, activity_title='Lecture 1', description='This is lecture 1')
         cls.file_path=os.path.join(settings.BASE_DIR, 'elearning_base', 'test_files', 'test1.pdf')
+
+    @classmethod
+    def tearDownClass(self):
+        super().tearDownClass() 
+        submission_1_dir = os.path.join(settings.MEDIA_ROOT, 'submissions', 'user_1')
+        submission_2_dir = os.path.join(settings.MEDIA_ROOT, 'submissions', 'user_2')
+        if os.path.exists(submission_1_dir):
+            shutil.rmtree(submission_1_dir)
+        if os.path.exists(submission_2_dir):
+            shutil.rmtree(submission_2_dir)   
 
     def test_creation(self):
         with open(self.file_path, 'rb') as f:
@@ -383,8 +454,56 @@ class TestSubmission(TestCase):
             self.course_activity.save()
             with self.assertRaises(ValidationError):
                 submission.clean()
-    
+
+    def test_submission_upload(self):
+        with open(self.file_path, 'rb') as f:
+            submission = Submission.objects.create(student=self.student, course_activity=self.course_activity, file=SimpleUploadedFile("test1.pdf", f.read(), content_type='application/pdf'))
+            self.assertTrue(submission.file)
+
+        #Had to use default storage path as manually concatenated path was overwriting other copy of file making it test1_alphanumeric.pdf
+        expected_path = os.path.normpath(default_storage.path(submission.file.name))
+        actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, submission.file.name))
+        
+        self.assertEqual(expected_path, actual_path)
+        self.assertTrue(os.path.exists(actual_path))
+
     def test_string_representation(self):
         with open(self.file_path, 'rb') as f:
             submission = Submission.objects.create(student=self.student, course_activity=self.course_activity, file=SimpleUploadedFile("test1.pdf", f.read(), content_type='application/pdf'))
-        self.assertEqual(str(submission), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\nCourse Title: Course1\nActivity Title: Lecture 1")
+        self.assertEqual(str(submission), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\nCourse1\nActivity Title: Lecture 1")
+
+class TestStatusUpdate(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.teacher, cls.student = create_common_objects()
+        cls.status_text = "This is a test status."
+        cls.status_update = StatusUpdate.objects.create(user=cls.student, status=cls.status_text)
+
+    def test_status_update_creation(self):
+        self.assertEqual(self.status_update.user, self.student)
+        self.assertEqual(self.status_update.status, self.status_text)
+        self.assertTrue(isinstance(self.status_update.created_at, datetime))
+        self.assertTrue(isinstance(self.status_update.updated_at, datetime))
+
+    def test_string_representation(self):
+        self.assertEqual(str(self.status_update), str(self.status_update.status_id))
+
+    def test_auto_set_timestamps(self):
+        self.assertTrue(self.status_update.created_at <= timezone.now())
+        self.assertTrue(self.status_update.updated_at <= timezone.now())
+
+    def test_status_update_editing(self):
+        original_update_time = self.status_update.updated_at
+        new_status = "This is an updated test status."
+        self.status_update.status = new_status
+        self.status_update.save()
+        self.status_update.refresh_from_db()
+        
+        self.assertNotEqual(self.status_update.updated_at, original_update_time)
+        self.assertEqual(self.status_update.status, new_status)
+
+    def test_status_update_deletion(self):
+        status_id = self.status_update.status_id
+        self.status_update.delete()
+        with self.assertRaises(StatusUpdate.DoesNotExist):
+            StatusUpdate.objects.get(status_id=status_id)

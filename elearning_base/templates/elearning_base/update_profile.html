@@ -1,0 +1,45 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+
+{% block main_content %}
+<div class="relative">
+    <!-- Back Button at top left -->
+    <div class="absolute top-0 left-0 pt-5 pl-5">
+        <a href="{% url 'home' %}" class="text-white bg-blue-700 
+        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Back</a>
+    </div>
+    <!-- Form Container -->
+    <div class="flex justify-center min-h-screen px-4">
+        <div class="bg-primary text-white p-5 rounded shadow-lg">
+            <h2 class="text-3xl font-semibold mb-8 text-center">Update your account details</h2>
+            <form method="post" action="{% url 'update_profile' %}">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="text-red-500 text-sm font-bold mb-4 text-center">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+    
+                <!-- Displaying field specific errors accordingly -->
+                {% for field in form %}
+                    <div class="mb-4">
+                        {% if field.errors %}
+                            <div class="text-red-500 text-sm font-bold mb-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="
+                    w-full rounded p-2 font-bold
+                    bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-500 hover:to-blue-600
+                    text-white transition duration-150 ease-in-out
+                ">UPDATE PROFILE</button>
+            </form>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

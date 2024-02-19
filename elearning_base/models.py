@@ -5,6 +5,21 @@ from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 from django.utils import timezone
 
+def user_img_directory_path(instance, filename):
+    return 'profile_imgs/user_{0}/{1}'.format(instance.user_id, filename)
+
+def course_img_directory_path(instance, filename):
+    return 'course_imgs/course_{0}/{1}'.format(instance.course_id, filename)
+
+def activity_material_file_directory_path(instance, filename):
+    return 'course_files/course_{0}/activity_{1}/files/{2}'.format(instance.course_activity.course.course_id, instance.course_activity.activity_id, filename)
+
+def activity_material_image_directory_path(instance, filename):
+    return '{0}/activity_{1}/images/{2}'.format(instance.course_activity.course.course_id, instance.course_activity.activity_id, filename)
+
+def submission_directory_path(instance, filename):
+    return 'submissions/user_{0}/activity_{1}/{2}'.format(instance.student.user_id, instance.course_activity.activity_id, filename)
+
 #Overriding the default user model to add additional fields
 class UserProfile(AbstractUser):
     user_id = models.AutoField(primary_key=True)
@@ -12,7 +27,7 @@ class UserProfile(AbstractUser):
     bio = models.TextField(max_length=500, blank=True)
     is_teacher = models.BooleanField(default=False, null=False, blank=False)
     date_of_birth = models.DateField(blank=True, null=True)
-    profile_img = models.ImageField(upload_to='profile_imgs', blank=True)
+    profile_img = models.ImageField(upload_to=user_img_directory_path, blank=True)
 
     def __str__(self):
         return f"Username: {self.username}\nEmail: {self.email}\nIs Teacher? {self.is_teacher}"
@@ -37,14 +52,14 @@ class UserProfile(AbstractUser):
 class Course(models.Model):
     course_id = models.AutoField(primary_key=True)
     course_title = models.CharField(max_length=100, unique=True, blank=False, null=False)
-    course_img = models.ImageField(upload_to='course_imgs', blank=True)
+    course_img = models.ImageField(upload_to=course_img_directory_path, blank=True)
     description = models.TextField(max_length=1000, blank=False, null=False)
     teacher = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Course Title: {self.course_title}"
+        return f"{self.course_title}"
     
     def clean(self):
         if self.teacher.is_teacher == False:
@@ -149,9 +164,9 @@ class CourseActivityMaterial(models.Model):
     course_activity = models.ForeignKey(CourseActivity, on_delete=models.CASCADE, related_name='activity_materials')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    file = models.FileField(upload_to='activity_materials', blank=True)
+    file = models.FileField(upload_to=activity_material_file_directory_path, blank=True)
     video_link = models.URLField(blank=True)
-    image = models.ImageField(upload_to='activity_materials', blank=True)
+    image = models.ImageField(upload_to=activity_material_image_directory_path, blank=True)
 
     def __str__(self):
         return f"{self.course_activity}\nMaterial Title: {self.material_title}"
@@ -161,7 +176,7 @@ class Submission(models.Model):
     student = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='submissions')
     course_activity = models.ForeignKey(CourseActivity, on_delete=models.CASCADE, related_name='submissions')
     submitted_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='submissions', blank=False, null=False)
+    file = models.FileField(upload_to=submission_directory_path, blank=False, null=False)
     grade = models.DecimalField(max_digits=5, decimal_places=0, blank=True, null=True)
 
     def __str__(self):
@@ -178,6 +193,16 @@ class Submission(models.Model):
                 raise ValidationError("Grade cannot be negative")
             elif self.grade > 100:
                 raise ValidationError("Grade cannot be greater than 100")
+            
+class StatusUpdate(models.Model):
+    status_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='status_updates')
+    status = models.TextField(max_length=1000, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.status_id}"
 
     
 #Why overwrite model save function to automatically clean when saving?
@@ -187,3 +212,4 @@ class Submission(models.Model):
 #Such as form handling and specific views or services that manage model instances
 #Validation logic might also vary and be dependent on the context in which model is being saved
 #Also performance overhead in cleaning automatically with every save
+            
