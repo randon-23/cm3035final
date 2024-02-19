@@ -1,0 +1,63 @@
+{% extends "base_unauthenticated.html" %}
+{% load static %}
+
+{% block content_left %}
+    <div class="text-center">
+        <img
+            class="mx-auto w-48"
+            src="{% static 'images/elearnlogo.png' %}"
+            alt="ELearn logo"
+        />
+        <h1 class="text-4xl font-bold text-white mb-12 mt-4">ELearn</h1>
+    </div>
+    <form method="post" action="{% url 'login' %}" class="flex flex-col max-w-md mx-auto bg-primary text-white p-5 rounded">
+        <h2 class="text-3xl text-center font-semibold mb-8">Log in to your account</h2>
+        
+        {% csrf_token %}
+        
+        <!-- Error Message Display -->
+        {% if form.non_field_errors %}
+        <div class="max-w-72 text-red-500 text-sm font-bold mb-2 w-full text-center">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div>
+                {{ field }}
+            </div>
+        {% endfor %}
+        <button type="submit" class="
+            w-full rounded p-2 mt-6 mb-2 font-bold
+        "
+        style="
+            background: linear-gradient(to right, #00C9A7, #00B4D8, #0096C7, #0057D9);
+        ">LOG IN</button>
+        <a href="{% url 'password_reset' %}" class="text-center">Forgot password?</a>
+
+        <div class="flex items-center justify-between py-6">
+            <p class="mb-0 mr-4">Don't have an account? </p>
+            <a href="{% url 'register' %}" class="flex-auto font-bold inline-block py-2 px-4 rounded text-center"
+            style="color: #0096C7"
+            >REGISTER</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block content_right %}
+    <h2 class="text-5xl font-semibold mb-10">Learning, re-imagined</h2>
+    <p class="text-center text-3xl">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>"
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endblock %}
+

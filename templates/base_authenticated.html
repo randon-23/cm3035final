@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen text-white">
+    <!-- Vertical Navbar on the Left -->
+    <nav class="w-1/12 p-4 flex flex-col justify-between" style="
+        background: linear-gradient(to right, #00C9A7, #00B4D8, #0096C7, #0057D9);
+        border-right: gray 2px solid;
+    ">
+        <div class="flex flex-col space-y-4">
+            <img
+                class="mx-auto"
+                src="{% static 'images/elearnlogo.png' %}"
+                alt="ELearn logo"
+            />
+            <h1 class="text-2xl text-center font-bold mt-2">ELearn</h1>
+            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Home</button>
+            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Button 2</button>
+            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Button 3</button>
+            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Button 4</button>
+            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Button 5</button>
+        </div>
+        <span class="font-bold text-center block">Version 1.0</span>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col pl-2">
+        <!-- Top Navbar -->
+        <div class="flex justify-between items-center bg-opacity-50 bg-black p-4"
+            style="border-bottom: gray 2px solid;">
+            <!-- Mini-profile Card -->
+            <div class="flex items-center space-x-4 bg-slate-400 rounded-lg px-4 py-2 ml-5">
+                <img src="{% if user.profile_img %}{{ user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-12 h-12 rounded-full">
+                <div class="min-h-10 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-20 dark:opacity-100"></div>
+                <div>
+                    <h1>
+                        Logged in as 
+                        <strong>
+                            {% if user.is_teacher %}Teacher{% else %}Student{% endif %}
+                        </strong>
+                    </h1>
+                    <h2 class="font-bold text-lg text-center mt-1">
+                        {{ user.username }}
+                    </h2>
+                </div>
+            </div>
+            <!--Search field-->
+            <div class="flex-grow">
+                <form class="w-full max-w-lg mx-auto">   
+                    <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                        </div>
+                        <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Courses, Users etc..." required />
+                        <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Logout Button -->
+            <div class="flex justify-between items-center space-x-4">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                        LOG OUT
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Page Specific Content -->
+        <main class="flex-1 overflow-y-auto p-4">
+            {% block main_content %}
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

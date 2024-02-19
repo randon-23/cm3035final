@@ -1,0 +1,15 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* 
+Had to override input styles manually
+as base styles were being applied instead 
+of utility class
+*/
+input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-color: dimgray;
+}

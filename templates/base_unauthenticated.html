@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen bg-primary">
+    <!--Left side-->
+    <div class="w-1/2 flex flex-col justify-center items-center">
+        <!--Login/Registration div/form-->
+        <div class="flex flex-col items-center justify-center h-full w-full max-w-md">
+            {% block content_left %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!--Right side-->
+    <div class="w-1/2 flex flex-col items-center" style="background: linear-gradient(to right, #00C9A7, #00B4D8, #0096C7, #0057D9)">
+        <div class="flex flex-col items-center justify-center h-full w-1/2 text-white">
+            {% block content_right %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

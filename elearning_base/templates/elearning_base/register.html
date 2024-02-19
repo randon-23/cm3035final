@@ -1,0 +1,52 @@
+{% extends "base_unauthenticated.html" %}
+{% load static %}
+
+{% block content_left %}
+    <form method="post" action="{% url 'register' %}" class="flex flex-col max-w-md mx-auto bg-primary text-white p-5 rounded">
+        <h2 class="text-3xl font-semibold mb-8 text-center">Register your user account</h2>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="max-w-72 text-red-500 text-sm font-bold mb-2 w-full text-center">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Manually rendering each field to cater for checkbox -->
+        {% for field in form %}
+            {% if field.name == 'is_teacher' %}
+                <!-- Displaying is_teacher boolean field inline with checkbox -->
+                <div class="flex items-center justify-center mb-2">
+                    {{ field }}
+                    <label for="{{ field.id_for_label }}" class="ml-2">{{ field.label }}</label>
+                </div>
+            {% else %}
+                <div class="mb-2">
+                    {% if field.errors %}
+                        <div class="text-red-500 text-sm font-bold">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                    {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <button type="submit" class="
+            w-full rounded p-2 mt-12 mb-2 font-bold
+        "
+        style="
+            background: linear-gradient(to right, #00C9A7, #00B4D8, #0096C7, #0057D9);
+        ">COMPLETE REGISTRATION</button>
+
+        <div class="flex items-center justify-between py-6">
+            <p class="mb-0 mr-4">Already have an account? </p>
+            <a href="{% url 'login' %}" class="flex-auto font-bold inline-block py-2 px-4 rounded text-center"
+            style="color: #0096C7"
+            >RETURN TO LOGIN</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block content_right %}
+    <h2 class="text-5xl font-semibold mb-10">Learning, re-imagined</h2>
+    <p class="text-center text-3xl">Set up your account here. Select whether you will use it for teacher or for student purposes. Each account has their own possible actions and permissions.</p>
+{% endblock %}
