@@ -25,6 +25,9 @@ class CourseActivityMaterialAdmin(admin.ModelAdmin):
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('submission_id', 'student', 'course_activity', 'file', 'grade')
 
+class StatusUpdateAdmin(admin.ModelAdmin):
+    list_display = ('status_id', 'user', 'status', 'created_at')
+
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Tag, TagAdmin)
@@ -33,3 +36,4 @@ admin.site.register(Enrollments, EnrollmentsAdmin)
 admin.site.register(CourseActivity, CourseActivityAdmin)
 admin.site.register(CourseActivityMaterial, CourseActivityMaterialAdmin)
 admin.site.register(Submission, SubmissionAdmin)
+admin.site.register(StatusUpdate, StatusUpdateAdmin)

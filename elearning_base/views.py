@@ -46,21 +46,22 @@ class LogoutView(LogoutView):
 
 @login_required
 def home_view(request):
+    status_update_form = StatusUpdateForm()
+    
     context = {
         'is_own_profile': True,
         'profile_user': request.user,
+        'form': status_update_form
     }
     return render(request, 'elearning_base/home.html', context)
 
 @login_required
 def user_profile_view(request, user_id):
     profile_user=get_object_or_404(UserProfile, pk=user_id)
-    form = StatusUpdateForm()
-
+    
     context = {
         'is_own_profile': request.user.user_id,
         'profile_user': profile_user,
-        'form': form
     }
 
     return render(request, 'elearning_base/home.html', context)

@@ -199,7 +199,6 @@ class StatusUpdate(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='status_updates')
     status = models.TextField(max_length=1000, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.status_id}"

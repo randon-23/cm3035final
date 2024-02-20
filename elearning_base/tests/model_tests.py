@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import IntegrityError, transaction
-from .models import *
+from ..models import *
 from datetime import date, datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import Group

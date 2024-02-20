@@ -91,4 +91,11 @@ class StatusUpdateForm(forms.ModelForm):
         fields = ['status']
         widgets = {
             'status': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s up?'}),
-        } 
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(StatusUpdateForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white'
+            })
