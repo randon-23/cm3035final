@@ -61,8 +61,8 @@ class TestUserProfile(TestCase):
         self.assertFalse(user2.is_teacher)
 
     def test_str_representation(self):
-        self.assertEqual(str(self.teacher), "Username: teacher1\nEmail: teacher1@gmail.com\nIs Teacher? True")
-        self.assertEqual(str(self.student), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False")
+        self.assertEqual(str(self.teacher), "Username: teacher1\nIs Teacher? True")
+        self.assertEqual(str(self.student), "Username: student1\nIs Teacher? False")
 
     def test_email_format(self):
         with self.assertRaises(ValidationError):
@@ -189,42 +189,6 @@ class TestCourse(TestCase):
         
         self.assertEqual(expected_path, actual_path)
         self.assertTrue(os.path.exists(actual_path))
-
-#Test for Tag model
-class TestTag(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.tag = Tag.objects.create(tag_name="Tag1")
-
-    def test_tag_creation(self):
-        self.assertEqual(self.tag.tag_name, "Tag1")
-
-    def test_tag_str_representation(self):
-        self.assertEqual(str(self.tag.tag_name), "Tag1")
-    
-class TestCourseTag(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.teacher, cls.student = create_common_objects()
-        cls.course = Course.objects.create(course_title="Web Dev", description="This is a web development course", teacher=cls.teacher) 
-        cls.tag = Tag.objects.create(tag_name="Web Development")
-        cls.course_tag=CourseTag.objects.create(course=cls.course, tag=cls.tag)
-
-    @classmethod
-    def tearDownClass(self):
-        Tag.objects.get(tag_name="Web Development").delete()
-        super().tearDownClass()
-
-    def test_creation(self):
-        self.assertEqual(self.course_tag.course, self.course)
-        self.assertEqual(self.course_tag.tag, self.tag)
-    
-    def test_uniqueness_together(self):
-        with self.assertRaises(IntegrityError), transaction.atomic():
-            CourseTag.objects.create(course=self.course, tag=self.tag)
-    
-    def test_string_representation(self):
-        self.assertEqual(str(self.course_tag), "Web Dev\nTag: Web Development")
 
 #Test for Enrollments model
 class TestEnrollments(TestCase):

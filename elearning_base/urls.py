@@ -17,7 +17,8 @@ urlpatterns = [
 
     #API Endpoints
     path('api/create_status_update/', api.create_status_update, name='create_status_update'),
-    path('api/get_status_updates/<int:user_id>/', api.get_status_updates, name='get_status_updates')
+    path('api/get_status_updates/<int:user_id>/', api.get_status_updates, name='get_status_updates'),
+    path('api/get_enrolled_courses/<int:user_id>/', api.get_enrolled_courses, name='get_enrolled_courses')
 ]
 
 if settings.DEBUG:

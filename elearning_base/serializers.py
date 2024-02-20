@@ -2,7 +2,14 @@ from rest_framework import serializers
 from .models import *
 from datetime import datetime
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['username', 'first_name', 'last_name', 'profile_img']
+
 class StatusUpdateSerializer(serializers.ModelSerializer):
+    # Nested serializer to include user details in the response
+    user = UserProfileSerializer(read_only=True) 
     #Customizing/overriding the errro field for a blank status
     status = serializers.CharField(error_messages={'blank': 'Status update cannot be empty.'})
 
@@ -21,3 +28,18 @@ class StatusUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = validated_data.pop('user')
         return StatusUpdate.objects.create(user=user, **validated_data)
+
+class CourseSerializer(serializers.ModelSerializer):
+    teacher = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Course
+        fields = ['course_id', 'course_title', 'course_img', 'description', 'teacher', 'created_at', 'updated_at']
+
+class EnrollmentsSerializer(serializers.ModelSerializer):
+    course = CourseSerializer(read_only=True)
+    student = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Enrollments
+        fields = ['enrollment_id', 'course', 'student', 'enrolled_at', 'status', 'blocked']

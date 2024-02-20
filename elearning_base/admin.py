@@ -7,12 +7,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('course_id', 'course_title', 'description', 'teacher')
 
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('tag_name',)
-
-class CourseTagAdmin(admin.ModelAdmin):
-    list_display = ('course', 'tag')
-
 class EnrollmentsAdmin(admin.ModelAdmin):
     list_display = ('enrollment_id', 'course', 'student')
 
@@ -30,8 +24,6 @@ class StatusUpdateAdmin(admin.ModelAdmin):
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(CourseTag, CourseTagAdmin)
 admin.site.register(Enrollments, EnrollmentsAdmin)
 admin.site.register(CourseActivity, CourseActivityAdmin)
 admin.site.register(CourseActivityMaterial, CourseActivityMaterialAdmin)

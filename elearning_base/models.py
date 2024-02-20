@@ -30,7 +30,7 @@ class UserProfile(AbstractUser):
     profile_img = models.ImageField(upload_to=user_img_directory_path, blank=True)
 
     def __str__(self):
-        return f"Username: {self.username}\nEmail: {self.email}\nIs Teacher? {self.is_teacher}"
+        return f"Username: {self.username}\nIs Teacher? {self.is_teacher}"
 
     def clean(self):
         if '@' not in self.email:
@@ -64,22 +64,6 @@ class Course(models.Model):
     def clean(self):
         if self.teacher.is_teacher == False:
             raise ValidationError("Only teachers can create courses")
-    
-class Tag(models.Model):
-    tag_name = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    
-    def __str__(self):
-        return f"{self.tag_name}"
-
-class CourseTag(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_tags')
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='course_tags')
-
-    def __str__(self):
-        return f"{self.course}\nTag: {self.tag}"
-    
-    class Meta:
-        unique_together = ('course', 'tag')
 
 # Bridge table for the many-to-many relationship between UserProfile and Course
 class Enrollments(models.Model):

@@ -84,32 +84,45 @@
                 })
                 .catch(function(error) {
                     console.error('Error:', error);
-                    displayFormErrors(error);
                 });
-
-                function displayFormErrors(errors) {
-                    // Assuming errors is an object where keys match your input field names
-                    // and values are arrays of error messages.
-                    Object.keys(errors).forEach(key => {
-                        const message = errors[key].join(' '); // Join all error messages for this field
-                        // Display this message in your UI, e.g., below the input field
-                        // You'll need to adjust this to match your HTML structure
-                        const errorMessageElement = document.createElement('div');
-                        errorMessageElement.textContent = message;
-                        errorMessageElement.style.color = 'red';
-                        const inputElement = document.getElementById(`id_${key}`);
-                        if (inputElement) {
-                            inputElement.parentNode.insertBefore(errorMessageElement, inputElement.nextSibling);
-                        }
-                    });
-                }
             });
         </script>
+
+        {% for status_update in status_updates %}
+        <!--Status Update Card-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+            <!--Image Container-->
+            <div class="flex justify-center w-full">
+                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
+            </div>
+            <!--Text Container-->
+            <div class="text-center w-full mt-4">
+                <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
+                <div class="whitespace-normal p-2">
+                    {{ status_update.status }}
+                </div>
+                <div>{{ status_update.created_at }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-lg text-gray-800">No status updates yet.</p>
+        {% endfor %}
     </div>
     <div class="w-2/5 flex flex-col items-center m-5">
         <!--Registered Courses card-->
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
-
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+            <div class="text-center w-full mb-4">
+                <h2 class="font-bold text-3xl">Registered Courses</h2>
+            </div>
+            <ul class="list-disc pl-5">
+                {% for enrollment in enrolled_courses %}
+                <li class="text-md text-gray-700">
+                    <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
+                </li>
+                {% empty %}
+                <li class="text-lg text-gray-800">No courses enrolled yet.</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
     {% else %}

@@ -8,6 +8,7 @@ from django.contrib import messages
 import json
 from .models import *
 from .forms import *
+from .api import *
 #redirect when successful action that modifies data to prevent duplicate submissions if the user refreshes
 #render when displaying data or template with context directly to user without changing URL in browser
 
@@ -47,11 +48,24 @@ class LogoutView(LogoutView):
 @login_required
 def home_view(request):
     status_update_form = StatusUpdateForm()
-    
+    status_update_response = get_status_updates(request, request.user.user_id)
+    if status_update_response.status_code == 200:
+        status_updates = json.loads(status_update_response.content)
+    else:
+        status_updates = {}
+
+    enrollments_response = get_enrolled_courses(request, request.user.user_id)
+    if enrollments_response.status_code == 200:
+        enrolled_courses = json.loads(enrollments_response.content)
+    else:
+        enrolled_courses = {}
+
     context = {
         'is_own_profile': True,
         'profile_user': request.user,
-        'form': status_update_form
+        'form': status_update_form,
+        'status_updates': status_updates,
+        'enrolled_courses': enrolled_courses
     }
     return render(request, 'elearning_base/home.html', context)
 
