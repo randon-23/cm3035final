@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializers import *
-import random
 import datetime 
 
 @api_view(['POST'])
@@ -31,7 +30,7 @@ def get_status_updates(request, user_id):
     
     if request.method == 'GET':
         status_updates = StatusUpdate.objects.filter(user=user).order_by('-created_at')
-        serializer = StatusUpdateSerializer(status_updates, many=True)
+        serializer = StatusUpdateSerializer(status_updates, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -46,8 +45,42 @@ def get_enrolled_courses(request, user_id):
     
     if request.method == 'GET':
         courses = Enrollments.objects.filter(student=user, status='Active').order_by('-enrolled_at')
-        serializer = EnrollmentsSerializer(courses, many=True)
+        serializer = EnrollmentsSerializer(courses, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_courses_taught(request, user_id):
+    try:
+        user = UserProfile.objects.get(user_id=user_id)
+    except UserProfile.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        courses_taught = Course.objects.filter(teacher=user).order_by('-created_at')
+        serializer = CourseSerializer(courses_taught, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_search_results(request, search_query):
+    if request.method == 'GET':
+        courses = Course.objects.filter(course_title__icontains=search_query)
+        teachers = UserProfile.objects.filter(username__icontains=search_query, is_teacher=True)
+        students = UserProfile.objects.filter(username__icontains=search_query, is_teacher=False)
+
+        course_serializer = CourseSerializer(courses, many=True, context={'request': request})
+        teachers_serializer = UserProfileSerializer(teachers, many=True, context={'request': request})
+        students_serializer = UserProfileSerializer(students, many=True, context={'request': request})
+        if request.user.is_teacher:
+            results_dict = {'courses': course_serializer.data, 'teachers': teachers_serializer.data, 'students': students_serializer.data}
+        else:
+            results_dict = {'courses': course_serializer.data, 'teachers': teachers_serializer.data}
+        return JsonResponse(results_dict, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        

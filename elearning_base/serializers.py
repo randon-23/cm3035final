@@ -2,10 +2,13 @@ from rest_framework import serializers
 from .models import *
 from datetime import datetime
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['username', 'first_name', 'last_name', 'profile_img']
+        fields = ['url', 'username', 'first_name', 'last_name', 'is_teacher', 'profile_img']
+        extra_kwargs = {
+            'url': {'view_name': 'user_profile', 'lookup_field': 'user_id'}
+        }
 
 class StatusUpdateSerializer(serializers.ModelSerializer):
     # Nested serializer to include user details in the response
@@ -29,12 +32,15 @@ class StatusUpdateSerializer(serializers.ModelSerializer):
         user = validated_data.pop('user')
         return StatusUpdate.objects.create(user=user, **validated_data)
 
-class CourseSerializer(serializers.ModelSerializer):
+class CourseSerializer(serializers.HyperlinkedModelSerializer):
     teacher = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = Course
-        fields = ['course_id', 'course_title', 'course_img', 'description', 'teacher', 'created_at', 'updated_at']
+        fields = ['url', 'course_id', 'course_title', 'course_img', 'description', 'teacher', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'url': {'view_name': 'course_page', 'lookup_field': 'course_id'}
+        }
 
 class EnrollmentsSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)

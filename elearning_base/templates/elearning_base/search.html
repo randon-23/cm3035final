@@ -1,0 +1,62 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+
+{% block main_content %}
+<div class="container mx-auto px-4">
+    <!-- Courses Results Section -->
+    <div class="my-8">
+        <h2 class="text-2xl font-bold mb-4">Course Results</h2>
+        {% for course in courses %}
+        <div class="mb-4 p-4 bg-slate-400 shadow rounded-lg flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-semibold">{{ course.course_title }}</h3>
+                <p class="truncate">{{ course.description }}</p>
+            </div>
+            <a href="{{ course.url }}" class="text-white bg-blue-700 hover:bg-blue-800 
+            focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 
+            dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Course</a>
+        </div>
+        {% empty %}
+        <p>No course results found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Teachers Results Section -->
+    <div class="my-8">
+        <h2 class="text-2xl font-bold mb-4">Teacher Results</h2>
+        {% for teacher in teachers %}
+        <div class="mb-4 p-4 bg-slate-400 shadow rounded-lg flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-semibold">{{ teacher.username }}</h3>
+                <p>{{ teacher.first_name }} {{ teacher.last_name }}</p>
+            </div>
+            <a href="{{ teacher.url }}" class="text-white bg-blue-700 hover:bg-blue-800 
+            focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 
+            dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Profile</a>
+        </div>
+        {% empty %}
+        <p>No teacher results found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Students Results Section, shown only if user is a teacher -->
+    {% if request.user.is_teacher %}
+    <div class="my-8">
+        <h2 class="text-2xl font-bold mb-4">Student Results</h2>
+        {% for student in students %}
+        <div class="mb-4 p-4 bg-slate-400 shadow rounded-lg flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-semibold">{{ student.username }}</h3>
+                <p>{{ student.first_name }} {{ student.last_name }}</p>
+            </div>
+            <a href="{{ student.url }}" class="text-white bg-blue-700 hover:bg-blue-800 
+            focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 
+            dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Profile</a>
+        </div>
+        {% empty %}
+        <p>No student results found.</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

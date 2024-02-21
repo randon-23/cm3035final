@@ -105,11 +105,28 @@
             </div>
         </div>
         {% empty %}
-        <p class="text-lg text-gray-800">No status updates yet.</p>
+        <p class="text-lg">No status updates yet.</p>
         {% endfor %}
     </div>
     <div class="w-2/5 flex flex-col items-center m-5">
-        <!--Registered Courses card-->
+        {% if user.is_teacher %}
+        <!--Courses taught when profile being viewed is own and is teacher-->
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+            <div class="text-center w-full mb-4">
+                <h2 class="font-bold text-3xl">Courses Taught</h2>
+            </div>
+            <ul class="list-disc pl-5">
+                {% for course in courses_taught %}
+                <li class="text-md text-gray-700">
+                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.start_date }}
+                </li>
+                {% empty %}
+                <li class="text-lg text-gray-800">No courses taught yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <!--Registered Courses card when profile is own and not teacher-->
         <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
             <div class="text-center w-full mb-4">
                 <h2 class="font-bold text-3xl">Registered Courses</h2>
@@ -124,9 +141,82 @@
                 {% endfor %}
             </ul>
         </div>
+        {% endif %}
     </div>
     {% else %}
+    <div class="w-full flex flex-col items-center m-5">
+        <!--Profile card for viewing other users' profiles-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
+            <!--Image Container-->
+            <div class="flex justify-center w-full">
+                <img src="{% if profile_user.profile_img %}{{ profile_user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+            </div>
+            <!--Text Container-->
+            <div class="text-center w-full mt-4">
+                <div class="font-bold text-5xl mb-2">{{ profile_user.first_name }} {{ profile_user.last_name }}</div>
+                <div class="whitespace-normal p-2">                    
+                    <strong>Username:</strong> {{ profile_user.username }}<br>
+                    <strong>Account type:</strong> {% if profile_user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
+                    <strong>Contact at:</strong> {{ profile_user.email }}<br>
+                    <strong>Date of Birth:</strong> {{ profile_user.date_of_birth|date:"Y-m-d" }}<br>
+                    <strong>Bio:</strong> {{ profile_user.bio }}
+                </div>
+            </div>
+        </div>
 
+        <!--Status Updates for other users-->
+        {% for status_update in status_updates %}
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+            <div class="flex justify-center w-full">
+                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
+            </div>
+            <div class="text-center w-full mt-4">
+                <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
+                <div class="whitespace-normal p-2">
+                    {{ status_update.status }}
+                </div>
+                <div>{{ status_update.created_at }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-lg text-gray-800">No status updates yet.</p>
+        {% endfor %}
+    </div>
+    <div class="w-2/5 flex flex-col items-center m-5">
+        {% if profile_user.is_teacher %}
+        <!--Courses taught when profile being viewed is not own and is teacher-->
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+            <div class="text-center w-full mb-4">
+                <h2 class="font-bold text-3xl">Courses Taught</h2>
+            </div>
+            <ul class="list-disc pl-5">
+                {% for course in courses_taught %}
+                <li class="text-md text-gray-700">
+                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.start_date }}
+                </li>
+                {% empty %}
+                <li class="text-lg text-gray-800">No courses taught yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <!--Registered Courses when profile being viewed is not own and is not teacher-->
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+            <div class="text-center w-full mb-4">
+                <h2 class="font-bold text-3xl">Registered Courses</h2>
+            </div>
+            <ul class="list-disc pl-5">
+                {% for enrollment in enrolled_courses %}
+                <li class="text-md text-gray-700">
+                    <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
+                </li>
+                {% empty %}
+                <li class="text-lg text-gray-800">No courses enrolled yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 {% endblock %}

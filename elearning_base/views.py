@@ -53,30 +53,66 @@ def home_view(request):
         status_updates = json.loads(status_update_response.content)
     else:
         status_updates = {}
-
-    enrollments_response = get_enrolled_courses(request, request.user.user_id)
-    if enrollments_response.status_code == 200:
-        enrolled_courses = json.loads(enrollments_response.content)
-    else:
-        enrolled_courses = {}
-
-    context = {
+    
+    if request.user.is_teacher:
+        courses_taught_response = get_courses_taught(request, request.user.user_id)
+        if courses_taught_response.status_code == 200:
+            courses_taught = json.loads(courses_taught_response.content)
+        else:
+            courses_taught = {}
+        
+        context = {
         'is_own_profile': True,
         'profile_user': request.user,
         'form': status_update_form,
         'status_updates': status_updates,
-        'enrolled_courses': enrolled_courses
+        'courses_taught': courses_taught
     }
+    else:
+        enrollments_response = get_enrolled_courses(request, request.user.user_id)
+        if enrollments_response.status_code == 200:
+            enrolled_courses = json.loads(enrollments_response.content)
+        else:
+            enrolled_courses = {}
+
+        context = {
+        'is_own_profile': True,
+        'profile_user': request.user,
+        'form': status_update_form,
+        'status_updates': status_updates,
+        'enrolled_courses': enrolled_courses,
+    }
+    
     return render(request, 'elearning_base/home.html', context)
 
 @login_required
 def user_profile_view(request, user_id):
     profile_user=get_object_or_404(UserProfile, pk=user_id)
+    is_own_profile = request.user.user_id == user_id
+
+    status_update_response = get_status_updates(request, user_id)
+    status_updates = json.loads(status_update_response.content) if status_update_response.status_code == 200 else {}
     
-    context = {
-        'is_own_profile': request.user.user_id,
-        'profile_user': profile_user,
-    }
+    if profile_user.is_teacher:
+        courses_taught_response = get_courses_taught(request, user_id)
+        courses_taught = json.loads(courses_taught_response.content) if courses_taught_response.status_code == 200 else {}
+        
+        context = {
+            'is_own_profile': is_own_profile,
+            'profile_user': profile_user,
+            'status_updates': status_updates,
+            'courses_taught': courses_taught
+        }
+    else:    
+        enrollments_response = get_enrolled_courses(request, user_id)
+        enrolled_courses = json.loads(enrollments_response.content) if enrollments_response.status_code == 200 else {}
+
+        context = {
+            'is_own_profile': is_own_profile,
+            'profile_user': profile_user,
+            'status_updates': status_updates,
+            'enrolled_courses': enrolled_courses
+        }
 
     return render(request, 'elearning_base/home.html', context)
 
@@ -92,6 +128,25 @@ def update_profile_view(request):
         form = UserProfileUpdateForm(instance=request.user)
     
     return render(request, 'elearning_base/update_profile.html', {'form': form})
+
+@login_required
+def search_view(request):
+    query = request.GET.get('query', '')
+    search_results_response = get_search_results(request, query)
+    search_results = json.loads(search_results_response.content) if search_results_response.status_code == 200 else {}
+
+    context = {
+        'courses': search_results.get('courses', []),
+        'teachers': search_results.get('teachers', []),
+        'students': search_results.get('students', []),
+        'query': query
+    }
+
+    return render(request, 'elearning_base/search.html', context)
+
+@login_required
+def course_view(request, course_id):
+    pass
 
 def password_reset_view(request):
     pass
