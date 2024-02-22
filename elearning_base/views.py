@@ -145,6 +145,38 @@ def search_view(request):
     return render(request, 'elearning_base/search.html', context)
 
 @login_required
+def create_course_view(request):
+    if request.method == 'POST':
+        form = CourseForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_course=form.save(commit=False)
+            new_course.teacher = request.user
+            new_course.save()
+
+            return redirect('get_enrolled_taught_courses')
+    else:
+        form = CourseForm()
+    return render(request, 'elearning_base/create_course.html', {'form': form})
+
+@login_required
+def enrolled_taught_courses_view(request):
+    if request.user.is_teacher:
+        courses_taught_response = get_courses_taught(request, request.user.user_id)
+        courses_taught = json.loads(courses_taught_response.content) if courses_taught_response.status_code == 200 else {}
+
+        context = {
+            'courses_taught': courses_taught
+        }
+    else:
+        enrolled_courses_response = get_enrolled_courses(request, request.user.user_id)
+        enrolled_courses = json.loads(enrolled_courses_response.content) if enrolled_courses_response.status_code == 200 else {}
+
+        context = {
+            'enrolled_courses': enrolled_courses
+        }
+    return render(request, 'elearning_base/enrolled_taught_courses.html', context)
+    
+@login_required
 def course_view(request, course_id):
     pass
 

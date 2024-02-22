@@ -51,43 +51,8 @@
                     text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Post</button>
                 </form>
         </div>
-        <!-- Accompanying Fetch API-->
-        <script>
-            document.getElementById('statusUpdateForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                fetch('/api/create_status_update/', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'status': document.getElementById('id_status').value
-                    }),
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json(); // For HTTP 201 Created
-                    } else if (response.status === 400) {
-                        return response.json().then(data => {
-                            throw data; // Throw the data to be caught in the catch block
-                        });
-                    } else {
-                        throw new Error('Something went wrong on server side.'); // For other server-side errors
-                    }
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                    document.getElementById('statusUpdateForm').reset(); // Reset form fields
-                    // Optionally, reload the page or part of it to show the updated list of status updates
-                    location.reload();
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                });
-            });
-        </script>
 
+        <!--Status Updates-->
         {% for status_update in status_updates %}
         <!--Status Update Card-->
         <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
@@ -111,7 +76,7 @@
     <div class="w-2/5 flex flex-col items-center m-5">
         {% if user.is_teacher %}
         <!--Courses taught when profile being viewed is own and is teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
             <div class="text-center w-full mb-4">
                 <h2 class="font-bold text-3xl">Courses Taught</h2>
             </div>
@@ -127,7 +92,7 @@
         </div>
         {% else %}
         <!--Registered Courses card when profile is own and not teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
             <div class="text-center w-full mb-4">
                 <h2 class="font-bold text-3xl">Registered Courses</h2>
             </div>
@@ -168,7 +133,7 @@
         {% for status_update in status_updates %}
         <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
             <div class="flex justify-center w-full">
-                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
+                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
             </div>
             <div class="text-center w-full mt-4">
                 <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
@@ -185,7 +150,7 @@
     <div class="w-2/5 flex flex-col items-center m-5">
         {% if profile_user.is_teacher %}
         <!--Courses taught when profile being viewed is not own and is teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
             <div class="text-center w-full mb-4">
                 <h2 class="font-bold text-3xl">Courses Taught</h2>
             </div>

@@ -1,5 +1,5 @@
 from django import forms
-from .models import UserProfile, StatusUpdate
+from .models import UserProfile, StatusUpdate, Course, CourseActivity, CourseActivityMaterial, Submission
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class UserForm(UserCreationForm):
@@ -95,6 +95,18 @@ class StatusUpdateForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(StatusUpdateForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white'
+            })
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['course_title', 'description', 'course_img']
+    
+    def __init__(self, *args, **kwargs):
+        super(CourseForm, self).__init__(*args, **kwargs)
         for fieldname, field in self.fields.items():
             field.widget.attrs.update({
                 'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white'
