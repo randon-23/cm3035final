@@ -1,5 +1,167 @@
 {% extends "base_authenticated.html"%}
 {% load static %}
-{% block main_content %}
 
+{% block main_content %}
+<div class="flex">
+    <div class="flex justify-center mb-6">
+        {% if not is_enrolled and not is_teacher %}
+        <form method="POST" action="{% url 'create_enrollment' course.course_id %}">
+            {% csrf_token %}
+            <button type="submit" class="ml-4 text-white bg-green-700 
+                    hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg 
+                    text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                Enroll
+            </button>
+        </form>
+        <script>
+            document.getElementById('enrollForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            const url = this.action;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json', // Ensure backend is set to parse JSON body
+                },
+            }).then(response => {
+                if (response.ok) {
+                    // Form submitted successfully, refresh the page
+                    window.location.reload();
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            }).catch(error => console.error('Error:', error));
+        });
+        </script>
+        {% elif is_enrolled and not is_teacher %}
+        <button disabled class="text-white bg-gray-400 cursor-not-allowed font-medium rounded-lg 
+                text-sm px-4 py-2">
+            Enrolled
+        </button>
+        {% elif is_teacher %}
+        <button disabled class="text-white bg-gray-400 cursor-not-allowed font-medium rounded-lg 
+                text-sm px-4 py-2">
+            Teachers cannot enroll
+        </button>
+        {% endif %}
+    </div>
+    <div class="w-3/5 flex flex-col items-center m-5">
+        <!--Profile card-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
+            <!--Image Container-->
+            <div class="flex justify-center w-full">
+                <img src="{% if course.course_img %}{{ course.course_img.url }}{% else %}{% static 'images/default_course.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+            </div>
+            <!--Text Container-->
+            <div class="text-center w-full mt-4">
+                <div class="font-bold text-5xl mb-2">{{ course.course_title }}</div>
+                <div class="whitespace-normal p-2">
+                    <strong>Course ID:</strong> {{ course.course_id }}<br>                    
+                    <strong>Description:</strong> {{ course.description }}<br>
+                    <strong>Teacher:</strong> {{ course.teacher.username }} - {{ course.teacher.first_name }} {{ course.teacher.last_name }}<br>
+                    <strong>Course created on: {{ course.created_at }}</strong>
+                </div>
+            </div>
+        </div>
+        {% if user.is_creator %}
+        <!--Add Course Activity Card-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                <form id="courseActivityForm" action="{% url 'create_course_activity' %}" method="POST">
+                    {% csrf_token %}
+                    {{ course_activity_form.as_p }}
+                    <button type="submit" class="w-full text-white bg-blue-700 
+                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Post</button>
+                </form>
+        </div>
+        {% endif %}
+
+        <!-- Course Activities -->
+        {% for course_activity in course_activities %}
+        <!-- Course Activity Card -->
+        <div class="w-full bg-slate-400 rounded-lg p-4 mt-4">
+            <!-- Course Activity Details -->
+            <div class="text-center w-full">
+                <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
+                <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
+                <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
+                <div class="text-md">Created at: {{ course_activity.created_at|date:"Y-m-d" }}</div>
+                {% if course_activity.deadline %}
+                <div class="text-md">Deadline: {{ course_activity.deadline|date:"Y-m-d" }}</div>
+                {% else %}
+                <div class="text-md">No deadline</div>
+                {% endif %}
+            </div>
+            <!-- Course Activity Materials -->
+            {% if course_activity.activity_materials.all %}
+            <div class="mt-4">
+                <h3 class="font-bold text-2xl mb-2">Materials</h3>
+                {% for material in course_activity.activity_materials.all %}
+                <div class="bg-slate-300 rounded-lg p-2 mb-2">
+                    <div class="font-bold">{{ material.material_title }}</div>
+                    <p>{{ material.description }}</p>
+                    {% if material.file %}
+                    <a href="{{ material.file.url }}" class="text-blue-500 hover:text-blue-700">Download File</a>
+                    {% endif %}
+                    {% if material.video_link %}
+                    <a href="{{ material.video_link }}" class="text-blue-500 hover:text-blue-700">View Video</a>
+                    {% endif %}
+                    {% if material.image %}
+                    <img src="{{ material.image.url }}" alt="Material Image" class="max-h-40 w-auto mt-2">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-lg mt-4">No materials added yet.</p>
+            {% if user.is_creator %}
+            <div class="mt-4">
+                <a href="{% url 'add_course_activity_material' course_activity.id %}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Add Course Activity Material
+                </a>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-lg text-center">No course activities yet.</p>
+        {% endfor %}
+    </div>
+    <div class="w-2/5 flex flex-col items-center m-5">
+        <h2 class="font-bold text-3xl mb-4">Feedback</h2>
+        <!--Add Feedback Card-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+            <form id="feedbackForm" action="{% url 'create_feedback' %}" method="POST" class="flex items-center w-full">
+                {% csrf_token %}
+                <div class="flex-grow">
+                    {{ form.as_p }}
+                </div>
+                <button type="submit" class="ml-4 text-white bg-blue-700 
+                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Post Feedback
+                </button>
+            </form>
+        </div>
+        {% for feedback in course_feedback %}
+        <div class="bg-slate-400 shadow-lg rounded-lg p-4 mb-4 w-full">
+            <div class="mr-4">
+                <img src="{% if feedback.student.profile_img %}{{ feedback.student.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-10 h-10 rounded-full">
+            </div>
+            <div>
+                <div class="font-bold text-xl mb-2">{{ feedback.student.username }}'s Feedback</div>
+                <p class="text-gray-700 text-base mb-4">
+                    {{ feedback.feedback }}
+                </p>
+                <div class="text-gray-600 text-sm">
+                    Posted on: {{ feedback.created_at|date:"Y-m-d" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-lg">No feedback has been provided yet.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

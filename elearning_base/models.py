@@ -186,6 +186,20 @@ class StatusUpdate(models.Model):
 
     def __str__(self):
         return f"{self.status_id}"
+    
+class Feedback(models.Model):
+    feedback_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='feedback')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='feedback')
+    feedback = models.TextField(max_length=1000, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.feedback_id}"
+    
+    def clean(self):
+        if self.student.is_teacher == True:
+            raise ValidationError("Only students can provide feedback")
 
     
 #Why overwrite model save function to automatically clean when saving?

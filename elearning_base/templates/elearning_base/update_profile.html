@@ -13,7 +13,7 @@
     <div class="flex justify-center min-h-screen px-4">
         <div class="bg-primary text-white p-5 rounded shadow-lg">
             <h2 class="text-3xl font-semibold mb-8 text-center">Update your account details</h2>
-            <form method="post" action="{% url 'update_profile' %}">
+            <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     <div class="text-red-500 text-sm font-bold mb-4 text-center">

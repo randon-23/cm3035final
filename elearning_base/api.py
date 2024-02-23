@@ -22,6 +22,49 @@ def create_status_update(request):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_course(request):
+    if request.method == 'POST':
+        serializer = CourseCreateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(teacher=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_course_activity(request, course_id):
+    pass
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_course_acivity_material(request, course_id, activity_id):
+    pass
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_feedback(request, course_id):
+    pass
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_enrollment(request):
+    if request.method == 'POST':
+        # No need to manually add student=request.user here, as it's done in serializer's create method
+        serializer = EnrollmentCreateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()  # student is added in the serializer's create method
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_status_updates(request, user_id):
@@ -85,7 +128,22 @@ def get_search_results(request, search_query):
         return JsonResponse(results_dict, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_course_activities_with_materials(request, course_id):
+    pass
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_course_feedback(request, course_id):
+    pass
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_enrollments(request, course_id):
+    pass
+
 class GetAvailableCourses(LoginRequiredMixin, ListView):
     model = Course
     template_name = 'elearning_base/get_available_courses.html'

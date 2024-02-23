@@ -83,7 +83,7 @@
             <ul class="list-disc pl-5">
                 {% for course in courses_taught %}
                 <li class="text-md text-gray-700">
-                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.start_date }}
+                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
                 </li>
                 {% empty %}
                 <li class="text-lg text-gray-800">No courses taught yet.</li>
@@ -109,7 +109,7 @@
         {% endif %}
     </div>
     {% else %}
-    <div class="w-full flex flex-col items-center m-5">
+    <div class="w-3/5 flex flex-col items-center m-5">
         <!--Profile card for viewing other users' profiles-->
         <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
             <!--Image Container-->
@@ -157,7 +157,7 @@
             <ul class="list-disc pl-5">
                 {% for course in courses_taught %}
                 <li class="text-md text-gray-700">
-                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.start_date }}
+                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
                 </li>
                 {% empty %}
                 <li class="text-lg text-gray-800">No courses taught yet.</li>
@@ -166,7 +166,7 @@
         </div>
         {% else %}
         <!--Registered Courses when profile being viewed is not own and is not teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
             <div class="text-center w-full mb-4">
                 <h2 class="font-bold text-3xl">Registered Courses</h2>
             </div>

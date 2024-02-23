@@ -21,11 +21,19 @@ urlpatterns = [
     
     #API Endpoints
     path('api/create_status_update/', api.create_status_update, name='create_status_update'),
+    path('api/create_course/', api.create_course, name='create_course_api'),
+    path('api/create_course_activity/<int:course_id>', api.create_course_activity, name='create_course_activity'),
+    path('api/add_course_activity_material/<int:course_id>/<int:activity_id>/', api.add_course_acivity_material, name='add_course_acivity_material'),
+    path('api/create_feedback/<int:course_id>/', api.create_feedback, name='create_feedback'),
+    path('api/create_enrollment/', api.create_enrollment, name='create_enrollment'),
     path('api/get_status_updates/<int:user_id>/', api.get_status_updates, name='get_status_updates'),
     path('api/get_enrolled_courses/<int:user_id>/', api.get_enrolled_courses, name='get_enrolled_courses'),
     path('api/get_courses_taught/<int:user_id>/', api.get_courses_taught, name='get_courses_taught'),
     path('api/get_search_results/<str:search_query>/', api.get_search_results, name='get_search_results'),
-    path('api/get_available_courses/', api.GetAvailableCourses.as_view(), name='get_available_courses')
+    path('api/get_course_activities/<int:course_id>/', api.get_course_activities_with_materials, name='get_course_activities_with_materials'),
+    path('api/get_available_courses/', api.GetAvailableCourses.as_view(), name='get_available_courses'),
+    path('api/get_course_feedback/<int:course_id>/', api.get_course_feedback, name='get_course_feedback'),
+    path('api/get_enrollments/<int:course_id>/', api.get_enrollments, name='get_course_enrollments'),
 ]
 
 if settings.DEBUG:

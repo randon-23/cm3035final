@@ -146,17 +146,11 @@ def search_view(request):
 
 @login_required
 def create_course_view(request):
-    if request.method == 'POST':
-        form = CourseForm(request.POST, request.FILES)
-        if form.is_valid():
-            new_course=form.save(commit=False)
-            new_course.teacher = request.user
-            new_course.save()
-
-            return redirect('get_enrolled_taught_courses')
-    else:
-        form = CourseForm()
-    return render(request, 'elearning_base/create_course.html', {'form': form})
+    form = CourseForm()
+    context = {
+        'form': form
+    }
+    return render(request, 'elearning_base/create_course.html', context)
 
 @login_required
 def enrolled_taught_courses_view(request):
@@ -178,7 +172,19 @@ def enrolled_taught_courses_view(request):
     
 @login_required
 def course_view(request, course_id):
-    pass
+    course = get_object_or_404(Course, pk=course_id)
+    is_creator = request.user == course.teacher
+    is_enrolled = Enrollments.objects.filter(student=request.user, course=course).exists()
+    is_teacher_viewer = request.user.is_teacher and not is_creator
+
+    context = {
+        'course': course,
+        'is_creator': is_creator,
+        'is_enrolled': is_enrolled,
+        'is_teacher_viewer': is_teacher_viewer
+    }
+
+    return render(request, 'elearning_base/course.html', context)
 
 def password_reset_view(request):
     pass
