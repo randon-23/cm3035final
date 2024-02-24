@@ -38,12 +38,38 @@ def create_course(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_course_activity(request, course_id):
-    pass
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'POST':
+        serializer = CourseActivitySerializer(data=request.data, context={'request': request, 'course': course})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def add_course_acivity_material(request, course_id, activity_id):
-    pass
+def create_course_activity_material(request, activity_id):
+    try:
+        course_activity = CourseActivity.objects.get(pk=activity_id)
+    except CourseActivity.DoesNotExist:
+        return Response({'message': 'Course or Activity not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'POST':
+        serializer = CourseActivityMaterialSerializer(data=request.data, context={'request': request, 'course_activity': course_activity})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -65,12 +91,17 @@ def create_feedback(request, course_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_enrollment(request):
+def create_enrollment(request, course_id):
+    try:
+        course=Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
     if request.method == 'POST':
         # No need to manually add student=request.user here, as it's done in serializer's create method
-        serializer = EnrollmentCreateSerializer(data=request.data, context={'request': request})
+        serializer = EnrollmentCreateSerializer(data=request.data, context={'request': request, 'course': course})
         if serializer.is_valid():
-            serializer.save()  # student is added in the serializer's create method
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -164,7 +195,17 @@ def get_search_results(request, search_query):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_course_activities_with_materials(request, course_id):
-    pass
+    try:
+        course = Course.objects.get(course_id=course_id)
+    except Course.DoesNotExist:
+        return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        activities = CourseActivity.objects.filter(course=course).order_by('-created_at')
+        serializer = CourseActivitySerializer(activities, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

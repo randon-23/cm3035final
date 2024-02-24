@@ -4,7 +4,7 @@
 {% block main_content %}
 <div class="flex justify-center items-center space-x-4 m-5">
     {% if not is_enrolled and not user.is_teacher %}
-    <form method="POST" action="{% url 'create_enrollment' course.course_id %}">
+    <form id="enrollForm" method="POST" action="{% url 'create_enrollment' course.course_id %}">
         {% csrf_token %}
         <button type="submit" class="ml-4 text-white bg-green-700 
                 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg 
@@ -20,13 +20,11 @@
         fetch(url, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'Content-Type': 'application/json', // Ensure backend is set to parse JSON body
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             },
         }).then(response => {
             if (response.ok) {
-                // Form submitted successfully, refresh the page
-                window.location.reload();
+                location.reload();
             } else {
                 throw new Error('Form submission failed');
             }
@@ -86,16 +84,66 @@
             <p class="text-lg mt-4">No content available.</p>
         {% else %}
             {% if is_creator %}
-            <!--Add Course Activity Card-->
-            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-                    <form id="courseActivityForm" action="{% url 'create_course_activity' course.course_id %}" method="POST">
+            <!-- Button to show the form -->
+            <button id="showCourseActivityForm" class="mt-4 text-white bg-blue-700 
+            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                Add Course Activity
+            </button>
+            <!--Add Course Activity Card (initially hidden)-->
+            <div id="courseActivityFormContainer" style="display: none">
+                <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                    <form id="courseActivityForm" action="{% url 'create_course_activity' course.course_id %}" method="POST" data-course-id="{{ course.course_id }}">
                         {% csrf_token %}
                         {{ course_activity_form.as_p }}
                         <button type="submit" class="w-full text-white bg-blue-700 
                         hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Post</button>
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
                     </form>
+                </div>
             </div>
+            <script>
+                document.getElementById('showCourseActivityForm').addEventListener('click', function() {
+                    if (document.getElementById('courseActivityFormContainer').style.display == 'none') {
+                        document.getElementById('courseActivityFormContainer').style.display = 'block';
+                    } else {
+                        document.getElementById('courseActivityFormContainer').style.display = 'none';
+                    }
+                })
+
+                document.getElementById('courseActivityForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const courseId = this.getAttribute('data-course-id');
+                    fetch(`/api/create_course_activity/${courseId}/`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else if (response.status === 400) {
+                            return response.json().then(data => {
+                                throw data;
+                            });
+                        } 
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+                        this.reset();
+                        location.reload();
+                    })
+                    .catch(function(error) {
+                        const errorField = Object.keys(error)[0];
+                        const errorMessage = error[errorField][0];
+                        alert(`Error: ${errorField} - ${errorMessage}`);
+                    });
+                });
+            </script>
             {% endif %}
 
             <!-- Course Activities -->
@@ -107,9 +155,9 @@
                     <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
                     <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
                     <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
-                    <div class="text-md">Created at: {{ course_activity.created_at|date:"Y-m-d" }}</div>
+                    <div class="text-md">Created at: {{ course_activity.created_at }}</div>
                     {% if course_activity.deadline %}
-                    <div class="text-md">Deadline: {{ course_activity.deadline|date:"Y-m-d" }}</div>
+                    <div class="text-md">Deadline: {{ course_activity.deadline }}</div>
                     {% else %}
                     <div class="text-md">No deadline</div>
                     {% endif %}
@@ -136,13 +184,40 @@
                 </div>
                 {% else %}
                 <p class="text-lg mt-4">No materials added yet.</p>
-                {% if is_creator %}
-                <div class="mt-4">
-                    <a href="{% url 'add_course_activity_material' course_activity.id %}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Add Course Activity Material
-                    </a>
-                </div>
-                {% endif %}
+                    {% if is_creator %}
+                    <button class="show-add-material-btn mt-4 text-white bg-blue-700 
+                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
+                            Add Course Activity Material
+                    </button>
+                    <!--Course Activity Material Form Container (initially hidden)-->
+                    <div id="addMaterialFormContainer-{{ course_activity.activity_id }}" style="display: none">
+                        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                            <!-- Adjust the form ID and action URL as needed -->
+                            <form id="addMaterialForm-{{ course_activity.activity_id }}" action="{% url 'create_course_activity_material' course_activity.activity_id %}" method="POST">
+                                {% csrf_token %}
+                                {{ course_activity_material_form.as_p }}
+                                <button type="submit" class="w-full text-white bg-blue-700 
+                                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            document.querySelectorAll('.show-add-material-btn').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const courseActivityId = this.getAttribute('data-course-activity-id');
+                                    if (document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display == 'none') {
+                                        document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'block';
+                                    } else {
+                                        document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'none';
+                                    }
+                                })
+                            })
+                        })
+                    </script>
+                    {% endif %}
                 {% endif %}
             </div>
             {% empty %}

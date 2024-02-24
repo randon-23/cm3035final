@@ -180,10 +180,14 @@ def enrolled_taught_courses_view(request):
 @login_required
 def course_view(request, course_id):
     feedback_form = FeedbackForm()
+    course_activity_form = CourseActivityForm()
+    course_activity_material_form = CourseActivityMaterialForm()
 
     course = get_object_or_404(Course, pk=course_id)
     feedback_response = get_course_feedback(request, course_id)
     course_feedback = json.loads(feedback_response.content) if feedback_response.status_code == 200 else {}
+    course_activities_response = get_course_activities_with_materials(request, course_id)
+    course_activities = json.loads(course_activities_response.content) if course_activities_response.status_code == 200 else {}
 
     is_creator = request.user.user_id == course.teacher.user_id
     is_enrolled = Enrollments.objects.filter(student=request.user, course=course).exists()
@@ -201,7 +205,10 @@ def course_view(request, course_id):
         'is_teacher_viewer': is_teacher_viewer,
         'is_blocked': is_blocked,
         'feedback_form': feedback_form,
-        'course_feedback': course_feedback
+        'course_activity_form': course_activity_form,
+        'course_feedback': course_feedback,
+        'course_activities': course_activities,
+        'course_activity_material_form': course_activity_material_form
     }
 
     return render(request, 'elearning_base/course.html', context)
