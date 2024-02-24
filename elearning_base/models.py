@@ -99,6 +99,8 @@ class Enrollments(models.Model):
     def save(self, *args, **kwargs):
         if self.blocked and self.status != self.BLOCKED:
             self.status = self.BLOCKED
+        elif not self.blocked and self.status == self.BLOCKED:
+            self.status = self.ACTIVE
         super(Enrollments, self).save(*args, **kwargs)
     
     class Meta:

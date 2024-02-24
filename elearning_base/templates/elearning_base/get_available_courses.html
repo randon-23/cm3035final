@@ -21,7 +21,7 @@
                         <td class="px-4 py-2 text-white">{{ course.course_title }}</td>
                         <td class="px-4 py-2 text-white">{{ course.description }}</td>
                         <td class="px-4 py-2 text-white">
-                            <a href="{{ course.url }}" class="inline-block text-white 
+                            <a href="{% url 'course_page' course.course_id %}" class="inline-block text-white 
                                 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
                                 font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">View Course</a>
                         </td>

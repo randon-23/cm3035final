@@ -109,3 +109,32 @@ class EnrollmentCreateSerializer(serializers.ModelSerializer):
         enrollment = Enrollments.objects.create(course=validated_data['course'], student=user)
 
         return enrollment
+    
+class EnrollmentUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enrollments
+        fields = ['blocked']
+    
+class FeedbackSerializer(serializers.ModelSerializer):
+    # Nested serializer to include user details in the response
+    student = UserProfileSerializer(read_only=True)
+    course = CourseSerializer(read_only=True) 
+    #Customizing/overriding the errro field for a blank status
+    feedback = serializers.CharField(error_messages={'blank': 'Status update cannot be empty.'})
+
+    class Meta:
+        model = Feedback
+        fields = ['feedback_id', 'student', 'course', 'feedback', 'created_at']
+        read_only_fields = ('feedback_id', 'student', 'course', 'created_at')  # Read-only as they are not included in the POST request
+        # but can be included in the response when getting posts.
+
+    #Ensuring status is not empty
+    def validate_status(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Feedback cannot be empty.")
+        return value
+    
+    def create(self, validated_data):
+        student = self.context['request'].user
+        course = self.context['course']
+        return Feedback.objects.create(student=student, course=course, **validated_data)

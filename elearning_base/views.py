@@ -5,6 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 import json
 from .models import *
 from .forms import *
@@ -87,6 +88,10 @@ def home_view(request):
 
 @login_required
 def user_profile_view(request, user_id):
+    #Added because if user accesses their own profile from search, the url used is not home but users/user_id
+    #And so when a user accesses their own profile, they should be able to see the status update form
+    status_update_form = StatusUpdateForm()
+
     profile_user=get_object_or_404(UserProfile, pk=user_id)
     is_own_profile = request.user.user_id == user_id
 
@@ -101,7 +106,8 @@ def user_profile_view(request, user_id):
             'is_own_profile': is_own_profile,
             'profile_user': profile_user,
             'status_updates': status_updates,
-            'courses_taught': courses_taught
+            'courses_taught': courses_taught,
+            'form': status_update_form
         }
     else:    
         enrollments_response = get_enrolled_courses(request, user_id)
@@ -111,7 +117,8 @@ def user_profile_view(request, user_id):
             'is_own_profile': is_own_profile,
             'profile_user': profile_user,
             'status_updates': status_updates,
-            'enrolled_courses': enrolled_courses
+            'enrolled_courses': enrolled_courses,
+            'form': status_update_form
         }
 
     return render(request, 'elearning_base/home.html', context)
@@ -172,19 +179,47 @@ def enrolled_taught_courses_view(request):
     
 @login_required
 def course_view(request, course_id):
+    feedback_form = FeedbackForm()
+
     course = get_object_or_404(Course, pk=course_id)
-    is_creator = request.user == course.teacher
+    feedback_response = get_course_feedback(request, course_id)
+    course_feedback = json.loads(feedback_response.content) if feedback_response.status_code == 200 else {}
+
+    is_creator = request.user.user_id == course.teacher.user_id
     is_enrolled = Enrollments.objects.filter(student=request.user, course=course).exists()
     is_teacher_viewer = request.user.is_teacher and not is_creator
+
+    is_blocked = False
+    if is_enrolled:
+        enrollment = Enrollments.objects.get(student=request.user, course=course)
+        is_blocked = enrollment.blocked
 
     context = {
         'course': course,
         'is_creator': is_creator,
         'is_enrolled': is_enrolled,
-        'is_teacher_viewer': is_teacher_viewer
+        'is_teacher_viewer': is_teacher_viewer,
+        'is_blocked': is_blocked,
+        'feedback_form': feedback_form,
+        'course_feedback': course_feedback
     }
 
     return render(request, 'elearning_base/course.html', context)
+
+@login_required
+def enrolled_students_view(request, course_id):
+    enrollments_response = get_enrolled_students(request, course_id)
+    enrollments = json.loads(enrollments_response.content) if enrollments_response.status_code == 200 else {}
+
+    paginator = Paginator(enrollments, 10)  # Show 10 enrollments per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'course_id': course_id    
+    }
+    return render(request, 'elearning_base/enrolled_students.html', context)
 
 def password_reset_view(request):
     pass

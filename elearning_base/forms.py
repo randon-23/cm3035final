@@ -118,7 +118,7 @@ class FeedbackForm(forms.ModelForm):
         model = Feedback
         fields = ['feedback']
         widgets = {
-            'status': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s up?'}),
+            'feedback': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What do you think about the course?'}),
         }
     
     def __init__(self, *args, **kwargs):

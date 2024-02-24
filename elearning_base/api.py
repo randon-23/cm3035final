@@ -48,7 +48,20 @@ def add_course_acivity_material(request, course_id, activity_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_feedback(request, course_id):
-    pass
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'POST':
+        serializer = FeedbackSerializer(data=request.data, context={'request': request, 'course': course })
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -64,6 +77,25 @@ def create_enrollment(request):
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_blocked_status(request, enrollment_id):
+    if request.method == 'PATCH' or request.method == 'POST':
+        try:
+            enrollment = Enrollments.objects.get(pk=enrollment_id)
+
+            if request.user != enrollment.course.teacher:
+                return Response({'message': 'You are not authorized to perform this action'}, status=status.HTTP_403_FORBIDDEN)
+
+            enrollment.blocked = not enrollment.blocked
+            enrollment.save()
+
+            serializer = EnrollmentUpdateSerializer(enrollment)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Enrollments.DoesNotExist:
+            return Response({'message': 'Enrollment not found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -89,7 +121,7 @@ def get_enrolled_courses(request, user_id):
         return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
-        courses = Enrollments.objects.filter(student=user, status='Active').order_by('-enrolled_at')
+        courses = Enrollments.objects.filter(student=user).order_by('-enrolled_at')
         serializer = EnrollmentsSerializer(courses, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
@@ -137,12 +169,32 @@ def get_course_activities_with_materials(request, course_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_course_feedback(request, course_id):
-    pass
+    try:
+        course = Course.objects.get(course_id=course_id)
+    except Course.DoesNotExist:
+        return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        feedbacks = Feedback.objects.filter(course=course).order_by('-created_at')
+        serializer = FeedbackSerializer(feedbacks, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_enrollments(request, course_id):
-    pass
+@permission_classes([IsAuthenticated, ])
+def get_enrolled_students(request, course_id):
+    if request.method=='GET':
+        try:
+            course = Course.objects.get(course_id=course_id)
+        except Course.DoesNotExist:
+            return Response({'message': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        students = Enrollments.objects.filter(course=course).order_by('-enrolled_at')
+        serializer = EnrollmentsSerializer(students, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class GetAvailableCourses(LoginRequiredMixin, ListView):
     model = Course
