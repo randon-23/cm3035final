@@ -34,7 +34,6 @@ def register_view(request):
         form = UserForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Registration successful!')
             return redirect('login')
         else:
             return render(request, 'elearning_base/register.html', {'form': form, 'error': f'Error in validating registration - {form.errors}'})
@@ -129,7 +128,6 @@ def update_profile_view(request):
         form = UserProfileUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profile updated successfully!')
             return redirect('home')
     else:
         form = UserProfileUpdateForm(instance=request.user)
@@ -227,6 +225,21 @@ def enrolled_students_view(request, course_id):
         'course_id': course_id    
     }
     return render(request, 'elearning_base/enrolled_students.html', context)
+
+@login_required
+def notification_view(request):
+    notifications_response = get_notifications(request)
+    notifications = json.loads(notifications_response.content) if notifications_response.status_code == 200 else {}
+
+    paginator = Paginator(notifications, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'notifications': notifications
+    }
+    return render(request, 'elearning_base/notifications.html', context)
 
 def password_reset_view(request):
     pass

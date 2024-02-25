@@ -203,7 +203,7 @@ def get_course_activities_with_materials(request, course_id):
     if request.method == 'GET':
         activities = CourseActivity.objects.filter(course=course).order_by('-created_at')
         serializer = CourseActivitySerializer(activities, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -223,7 +223,7 @@ def get_course_feedback(request, course_id):
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, ])
+@permission_classes([IsAuthenticated])
 def get_enrolled_students(request, course_id):
     if request.method=='GET':
         try:
@@ -233,6 +233,21 @@ def get_enrolled_students(request, course_id):
         
         students = Enrollments.objects.filter(course=course).order_by('-enrolled_at')
         serializer = EnrollmentsSerializer(students, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request, user_id):
+    if request.method == 'GET':
+        try:
+            user = UserProfile.objects.get(user_id=user_id)
+        except UserProfile.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        notifications = Notification.objects.filter(recipient=user).order_by('-created_at')
+        serializer = NotificationSerializer(notifications, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

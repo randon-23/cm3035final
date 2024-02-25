@@ -1,0 +1,41 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+
+{% block main_content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-xl font-semibold mb-4">Notifications Inbox</h1>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for notification in notifications %}
+            <li class="px-4 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                <div class="flex items-center">
+                    <div class="text-sm font-medium text-gray-900">
+                        {{ notification.title }}
+                    </div>
+                    <div class="ml-2 flex-shrink-0 flex">
+                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            {{ notification.created_at }}
+                            {{ notification.message }}
+                        </p>
+                    </div>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"> View </a>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4">No notifications found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="py-4">
+        {% if notifications.has_previous %}
+        <a href="?page={{ notifications.previous_page_number }}" class="py-2 px-4 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Previous</a>
+        {% endif %}
+        <span class="py-2 px-4 text-gray-700">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+        {% if notifications.has_next %}
+        <a href="?page={{ notifications.next_page_number }}" class="py-2 px-4 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

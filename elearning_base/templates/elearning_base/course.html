@@ -148,80 +148,116 @@
 
             <!-- Course Activities -->
             {% for course_activity in course_activities %}
-            <!-- Course Activity Card -->
-            <div class="w-full bg-slate-400 rounded-lg p-4 mt-4">
-                <!-- Course Activity Details -->
-                <div class="text-center w-full">
-                    <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
-                    <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
-                    <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
-                    <div class="text-md">Created at: {{ course_activity.created_at }}</div>
-                    {% if course_activity.deadline %}
-                    <div class="text-md">Deadline: {{ course_activity.deadline }}</div>
+                <!-- Course Activity Card -->
+                <div class="w-full bg-slate-400 rounded-lg p-4 mt-4">
+                    <!-- Course Activity Details -->
+                    <div class="text-center w-full">
+                        <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
+                        <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
+                        <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
+                        <div class="text-md">Created at: {{ course_activity.created_at }}</div>
+                        {% if course_activity.deadline %}
+                        <div class="text-md">Deadline: {{ course_activity.deadline }}</div>
+                        {% else %}
+                        <div class="text-md">No deadline</div>
+                        {% endif %}
+                    </div>
+                    <!-- Course Activity Materials -->
+                    {% if course_activity.activity_materials %}
+                    <div class="mt-4">
+                        <h3 class="font-bold text-2xl mb-2">Materials</h3>
+                        {% for material in course_activity.activity_materials %}
+                            <div class="bg-slate-300 rounded-lg p-2 mb-2">
+                                <div class="font-bold">{{ material.material_title }}</div>
+                                <p>{{ material.description }}</p>
+                                {% if material.file %}
+                                <a href="{{ material.file.url }}" class="text-blue-500 hover:text-blue-700">Download File</a>
+                                {% endif %}
+                                {% if material.video_link %}
+                                <a href="{{ material.video_link }}" class="text-blue-500 hover:text-blue-700">View Video</a>
+                                {% endif %}
+                                {% if material.image %}
+                                <img src="{{ material.image.url }}" alt="Material Image" class="max-h-40 w-auto mt-2">
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                    <div class="text-md">No deadline</div>
+                        <p class="text-lg mt-4">No materials added yet.</p>
                     {% endif %}
-                </div>
-                <!-- Course Activity Materials -->
-                {% if course_activity.activity_materials.all %}
-                <div class="mt-4">
-                    <h3 class="font-bold text-2xl mb-2">Materials</h3>
-                    {% for material in course_activity.activity_materials.all %}
-                    <div class="bg-slate-300 rounded-lg p-2 mb-2">
-                        <div class="font-bold">{{ material.material_title }}</div>
-                        <p>{{ material.description }}</p>
-                        {% if material.file %}
-                        <a href="{{ material.file.url }}" class="text-blue-500 hover:text-blue-700">Download File</a>
-                        {% endif %}
-                        {% if material.video_link %}
-                        <a href="{{ material.video_link }}" class="text-blue-500 hover:text-blue-700">View Video</a>
-                        {% endif %}
-                        {% if material.image %}
-                        <img src="{{ material.image.url }}" alt="Material Image" class="max-h-40 w-auto mt-2">
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="text-lg mt-4">No materials added yet.</p>
                     {% if is_creator %}
-                    <button class="show-add-material-btn mt-4 text-white bg-blue-700 
-                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
-                            Add Course Activity Material
-                    </button>
-                    <!--Course Activity Material Form Container (initially hidden)-->
-                    <div id="addMaterialFormContainer-{{ course_activity.activity_id }}" style="display: none">
-                        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-                            <!-- Adjust the form ID and action URL as needed -->
-                            <form id="addMaterialForm-{{ course_activity.activity_id }}" action="{% url 'create_course_activity_material' course_activity.activity_id %}" method="POST">
-                                {% csrf_token %}
-                                {{ course_activity_material_form.as_p }}
-                                <button type="submit" class="w-full text-white bg-blue-700 
-                                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
-                            </form>
+                        <button class="show-add-material-btn mt-4 text-white bg-blue-700 
+                            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
+                                Add Course Activity Material
+                        </button>
+                        <!--Course Activity Material Form Container (initially hidden)-->
+                        <div id="addMaterialFormContainer-{{ course_activity.activity_id }}" style="display: none">
+                            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                                <!-- Adjust the form ID and action URL as needed -->
+                                <form id="addMaterialForm-{{ course_activity.activity_id }}" data-course-activity-id="{{ course_activity.activity_id }}" action="{% url 'create_course_activity_material' course_activity.activity_id %}" method="POST">
+                                    {% csrf_token %}
+                                    {{ course_activity_material_form.as_p }}
+                                    <button type="submit" class="w-full text-white bg-blue-700 
+                                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            document.querySelectorAll('.show-add-material-btn').forEach(button => {
-                                button.addEventListener('click', function() {
-                                    const courseActivityId = this.getAttribute('data-course-activity-id');
-                                    if (document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display == 'none') {
-                                        document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'block';
-                                    } else {
-                                        document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'none';
-                                    }
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.querySelectorAll('.show-add-material-btn').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        const courseActivityId = this.getAttribute('data-course-activity-id');
+                                        if (document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display == 'none') {
+                                            document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'block';
+                                        } else {
+                                            document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'none';
+                                        }
+                                    })
                                 })
                             })
-                        })
-                    </script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.querySelectorAll('[id^="addMaterialForm-"]').forEach(form => {
+                                    form.addEventListener('submit', function(e) {
+                                        e.preventDefault();
+
+                                        const formData = new FormData(this);
+                                        const courseActivityId = this.getAttribute('data-course-activity-id');
+                                        fetch(`/api/create_course_activity_material/${courseActivityId}/`, {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                            },
+                                        })
+                                        .then(response => {
+                                            if (response.ok) {
+                                                return response.json();
+                                            } else if (response.status === 400) {
+                                                return response.json().then(data => {
+                                                    throw data;
+                                                });
+                                            } 
+                                        })
+                                        .then(data => {
+                                            console.log('Success:', data);
+                                            this.reset();
+                                            location.reload();
+                                        })
+                                        .catch(function(error) {
+                                            const errorField = Object.keys(error)[0];
+                                            const errorMessage = error[errorField][0];
+                                            alert(`Error: ${errorField} - ${errorMessage}`);
+                                        });
+                                    });
+                                });
+                            });
+                        </script>
                     {% endif %}
-                {% endif %}
-            </div>
-            {% empty %}
-            <p class="text-lg text-center">No course activities yet.</p>
+                </div>
+                {% empty %}
+                <p class="text-lg text-center">No course activities yet.</p>
             {% endfor %}
         {% endif %}
     </div>

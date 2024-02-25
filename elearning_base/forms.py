@@ -153,7 +153,7 @@ class CourseActivityMaterialForm(forms.ModelForm):
         fields = ['material_title', 'description', 'file', 'video_link', 'image']
     
     def __init__(self, *args, **kwargs):
-        super(CourseActivityForm, self).__init__(*args, **kwargs)
+        super(CourseActivityMaterialForm, self).__init__(*args, **kwargs)
         for fieldname, field in self.fields.items():
             field.widget.attrs.update({
                 'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',

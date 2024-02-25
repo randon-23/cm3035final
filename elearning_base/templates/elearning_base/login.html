@@ -49,15 +49,5 @@
 {% block content_right %}
     <h2 class="text-5xl font-semibold mb-10">Learning, re-imagined</h2>
     <p class="text-center text-3xl">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="message {{ message.tags }}">
-                {{ message }}
-            </div>"
-        {% endfor %}
-    </div>
-    {% endif %}
 {% endblock %}
 

@@ -1,11 +1,3 @@
-//To show messages once user is registered
-setTimeout(function() {
-    const messages = document.querySelector('.messages');
-    if (messages) {
-        messages.style.display = 'none';
-    }
-}, 5000);
-
 // Tracks status update form submission to make POST API call and show the updated list of status updates
 document.getElementById('statusUpdateForm').addEventListener('submit', function(e) {
     e.preventDefault();

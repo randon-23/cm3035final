@@ -204,3 +204,12 @@ class CourseActivitySerializer(serializers.ModelSerializer):
         # Assuming 'course' is added to the context in the view
         course = self.context['course']
         return CourseActivity.objects.create(course=course, **validated_data)
+    
+class NotificationSerializer(serializers.ModelSerializer):
+    recipient = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['notification_id', 'recipient', 'title', 'message', 'created_at', 'read']
+        read_only_fields = ('notification_id', 'recipient', 'created_at', 'read')
+

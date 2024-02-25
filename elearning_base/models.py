@@ -203,6 +203,16 @@ class Feedback(models.Model):
         if self.student.is_teacher == True:
             raise ValidationError("Only students can provide feedback")
 
+class Notification(models.Model):
+    notification_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=100, blank=False, null=False)
+    message = models.TextField(max_length=1000, blank=False, null=False)
+    recipient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='notifications')
+    read = models.BooleanField(default=False, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.notification_id}"
     
 #Why overwrite model save function to automatically clean when saving?
 #Ensures model is always validated before saving to the database
