@@ -128,6 +128,26 @@ def update_blocked_status(request, enrollment_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_notification_read(request, notification_id):
+    if request.method == 'PATCH' or request.method == 'POST':
+        try:
+            notification = Notification.objects.get(pk=notification_id)
+
+            if request.user != notification.recipient:
+                return Response({'message': 'You are not authorized to perform this action'}, status=status.HTTP_403_FORBIDDEN)
+
+            notification.read = not notification.read
+            notification.save()
+
+            serializer = NotificationUpdateSerializer(notification)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Notification.DoesNotExist:
+            return Response({'message': 'Enrollment not found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_status_updates(request, user_id):

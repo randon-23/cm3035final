@@ -227,8 +227,8 @@ def enrolled_students_view(request, course_id):
     return render(request, 'elearning_base/enrolled_students.html', context)
 
 @login_required
-def notification_view(request):
-    notifications_response = get_notifications(request)
+def notifications_view(request):
+    notifications_response = get_notifications(request, request.user.user_id)
     notifications = json.loads(notifications_response.content) if notifications_response.status_code == 200 else {}
 
     paginator = Paginator(notifications, 20)
