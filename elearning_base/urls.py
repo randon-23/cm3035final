@@ -21,7 +21,7 @@ urlpatterns = [
     path('enrolled_students/<int:course_id>/', views.enrolled_students_view, name='enrolled_students'),
     path('notifications/', views.notifications_view, name='notifications'),
     
-    #API Endpoints - Done
+    #API Endpoints
     path('api/create_status_update/', api.create_status_update, name='create_status_update'),
     path('api/create_course/', api.create_course, name='create_course_api'),
     path('api/create_feedback/<int:course_id>/', api.create_feedback, name='create_feedback'),

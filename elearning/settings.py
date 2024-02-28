@@ -33,14 +33,15 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'elearning_base.apps.ElearningBaseConfig',
+    'rest_framework',
+    'channels',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'channels'
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'elearning.wsgi.application'
+ASGI_APPLICATION = 'elearning.asgi.application'
 
 
 # Database
@@ -145,3 +147,13 @@ LOGIN_URL = 'login'
 
 #Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+#Channels settings
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        }
+    }
+}

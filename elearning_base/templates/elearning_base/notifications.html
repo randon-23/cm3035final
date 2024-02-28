@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 <div class="ml-4 flex-shrink-0">
-                    <button data-notification-id="{{ notification.notification_id }}" class="toggle-read-status m-4 inline-block text-white font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out {{ notification.read|yesno:'bg-gray-700, bg-blue-500 hover:bg-blue-700' }}" {% if notification.read %}disabled{% endif %}>
+                    <button data-notification-id="{{ notification.notification_id }}" class="toggle-read-status m-4 inline-block text-white font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out {{ notification.read|yesno:'bg-gray-700, border-blue-500 hover:bg-blue-700' }}" {% if notification.read %}disabled{% endif %}>
                         {{ notification.read|yesno:'Read,Mark as Read' }}
                     </button>
                 </div>

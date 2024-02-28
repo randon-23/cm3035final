@@ -2,6 +2,8 @@ from celery import shared_task
 from django.contrib.auth import get_user_model
 from celery.utils.log import get_task_logger
 from .models import Enrollments, Notification, CourseActivity, Course
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 User = get_user_model()
 log = get_task_logger(__name__)
@@ -10,10 +12,35 @@ log = get_task_logger(__name__)
 def send_enrollment_notification(enrollment_id):
     try:
         enrollment = Enrollments.objects.get(enrollment_id=enrollment_id)
-        Notification.objects.create(
+        teacher = enrollment.course.teacher
+        notification = Notification.objects.create(
             title="New Enrollment",
             recipient=enrollment.course.teacher, 
             message=f"New enrollment for course {enrollment.course.course_title} - {enrollment.student.username}"
+        )
+        # Send notification via channels to teacher
+        channel_layer = get_channel_layer()
+        group_name = f"enrollment_notifications_{teacher.user_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,  # Group name where all notification listeners are added
+            {
+                "type": "new.notification",  # Custom event type name
+                "message": notification.message,
+                "title": notification.title,
+            }
+        )
+
+        # Notify corresponding enrollment student client to subscribe to course-specific notifications
+        student_personal_group = f"user_notifications_{enrollment.student.user_id}"
+        course_material_group = f"new_material_notifications_{enrollment.course.course_id}"
+        course_activity_group = f"new_activity_notifications_{enrollment.course.course_id}"
+        async_to_sync(channel_layer.group_send)(
+            student_personal_group,
+            {
+                "type": "dynamic.subscription",
+                "material_group": course_material_group,
+                "activity_group": course_activity_group
+            }
         )
     except Enrollments.DoesNotExist:
         log.error("Enrollment does not exist")
@@ -24,11 +51,25 @@ def send_new_material_notification(student_id, course_activity, course, material
         student = User.objects.get(user_id=student_id)
         course_activity = CourseActivity.objects.get(activity_id=course_activity)
         course = Course.objects.get(course_id=course)
-        Notification.obejcts.create(
+        notification = Notification.objects.create(
             title="New Material",
             recipient=student,
             message=f"New material {material_title} added to following course -> activity: {course.course_title} -> {course_activity.activity_title}"
-    )
+        )
+        # Send notification via channels to all enrolled students
+
+        channel_layer = get_channel_layer
+        enrollments = Enrollments.objects.filter(course=course)
+        for enrollment in enrollments:
+            group_name = f"new_material_notifications_{enrollment.student.user_id}"
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    "type": "new.notification",
+                    "message": notification.message,
+                    "title": notification.title
+                }
+            )
     except (User.DoesNotExist, CourseActivity.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new material notification")
 
@@ -37,10 +78,24 @@ def send_new_activity_notification(student_id, course, activity_title):
     try:
         student = User.objects.get(user_id=student_id)
         course = Course.objects.get(course_id=course)
-        Notification.objects.create(
+        notification = Notification.objects.create(
             title="New Activity",
             recipient=student,
             message=f"New activity {activity_title} added to following course -> {course.course_title}"
-    )
+        )
+
+        # Send notification via channels to all enrolled students
+        channel_layer = get_channel_layer()
+        enrollments = Enrollments.objects.filter(course=course)
+        for enrollment in enrollments:
+            group_name = f"new_activity_notifications_{enrollment.student.user_id}"
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    "type": "new.notification",
+                    "message": notification.message,
+                    "title": notification.title
+                }
+            )
     except (User.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new activity notification")

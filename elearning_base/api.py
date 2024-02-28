@@ -266,7 +266,7 @@ def get_notifications(request, user_id):
         except UserProfile.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        notifications = Notification.objects.filter(recipient=user).order_by('-created_at')
+        notifications = Notification.objects.filter(recipient=user, read=False).order_by('-created_at')
         serializer = NotificationSerializer(notifications, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:

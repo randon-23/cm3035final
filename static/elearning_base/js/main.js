@@ -32,3 +32,4 @@ document.getElementById('statusUpdateForm').addEventListener('submit', function(
         console.error('Error:', error);
     });
 });
+
