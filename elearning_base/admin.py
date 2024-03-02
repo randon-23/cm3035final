@@ -28,6 +28,9 @@ class FeedbackAdmin(admin.ModelAdmin):
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('notification_id', 'recipient', 'title', 'message', 'read', 'created_at')
 
+class LobbyMessageAdmin(admin.ModelAdmin):
+    list_display = ('message_id', 'user', 'message', 'created_at')
+
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Enrollments, EnrollmentsAdmin)
@@ -37,3 +40,4 @@ admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(StatusUpdate, StatusUpdateAdmin)
 admin.site.register(Feedback, FeedbackAdmin)
 admin.site.register(Notification, NotificationAdmin)
+admin.site.register(LobbyMessage, LobbyMessageAdmin)

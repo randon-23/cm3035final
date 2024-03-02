@@ -214,6 +214,16 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.notification_id}"
     
+class LobbyMessage(models.Model):
+    message_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='lobby_messages')
+    message = models.TextField(max_length=1000, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.message_id}"
+    
+    
 #Why overwrite model save function to automatically clean when saving?
 #Ensures model is always validated before saving to the database
 #Important as not always guaranteed that the model will be validated before saving

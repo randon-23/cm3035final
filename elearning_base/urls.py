@@ -11,7 +11,6 @@ urlpatterns = [
     path('home/', views.home_view, name='home'),
     path('users/<int:user_id>/', views.user_profile_view, name='user_profile'),
     path('register/', views.register_view, name='register'),
-    path('password_reset/', views.password_reset_view, name='password_reset'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('update_profile/', views.update_profile_view, name='update_profile'),
     path('search/', views.search_view, name='search'),
@@ -20,6 +19,7 @@ urlpatterns = [
     path('enrolled_taught_courses/', views.enrolled_taught_courses_view, name='enrolled_taught_courses'),
     path('enrolled_students/<int:course_id>/', views.enrolled_students_view, name='enrolled_students'),
     path('notifications/', views.notifications_view, name='notifications'),
+    path('lobby/', views.lobby_view, name='lobby'),
     
     #API Endpoints
     path('api/create_status_update/', api.create_status_update, name='create_status_update'),

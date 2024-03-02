@@ -35,7 +35,11 @@
             </a>
             {% endif %}
             <br>
-            <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Live Chat</button>
+            <a href="{% url 'lobby' %}">
+                <button class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300">Live Chat
+                    <span id="newMessagesIndicator" class="hidden bg-red-500 text-white px-2 py-1 ml-2 rounded">NEW</span>
+                </button>
+            </a>
             <a href="{% url 'notifications' %}">
                 <button data-user-id="{{ user.user_id }}" class="w-full font-bold py-2 px-4 rounded opacity-75 hover:opacity-100 transition-opacity duration-300 notification-button">Notifications
                     <span id="newNotificationsIndicator" class="hidden bg-red-500 text-white px-2 py-1 ml-2 rounded">NEW</span>

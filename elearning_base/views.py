@@ -241,5 +241,6 @@ def notifications_view(request):
     }
     return render(request, 'elearning_base/notifications.html', context)
 
-def password_reset_view(request):
-    pass
+@login_required
+def lobby_view(request):
+    return render(request, 'elearning_base/lobby.html')
