@@ -217,3 +217,17 @@ class NotificationUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['read']
+
+class LobbyMessageSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = LobbyMessage
+        fields = ['message_id', 'user', 'message', 'created_at']
+
+#Wrapper serializer to used for structuring the Swagger documentation of complex API endpoint - search results.
+class SearchResultSerializer(serializers.Serializer):
+    courses = CourseSerializer(many=True, read_only=True)
+    teachers = UserProfileSerializer(many=True, read_only=True)
+    students = UserProfileSerializer(many=True, read_only=True, required=False) # Not required as it's not always included in the response depending on user
+

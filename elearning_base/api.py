@@ -5,10 +5,19 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import *
 from .serializers import *
-import datetime 
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=StatusUpdateSerializer, 
+    responses={
+        201: StatusUpdateSerializer,
+        400: 'Bad request', 
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_status_update(request):
@@ -22,6 +31,14 @@ def create_status_update(request):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=CourseCreateSerializer, 
+    responses={
+        201: CourseCreateSerializer, 
+        400: 'Bad request', 
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_course(request):
@@ -35,6 +52,15 @@ def create_course(request):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=CourseActivitySerializer, 
+    responses={
+        201: CourseActivitySerializer, 
+        400: 'Bad request', 
+        404: 'Course not found', 
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_course_activity(request, course_id):
@@ -53,6 +79,15 @@ def create_course_activity(request, course_id):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=CourseActivityMaterialSerializer, 
+    responses={
+        201: CourseActivityMaterialSerializer,
+        400: 'Bad request',
+        404: 'Course or Activity not found',
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_course_activity_material(request, activity_id):
@@ -71,6 +106,15 @@ def create_course_activity_material(request, activity_id):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=FeedbackSerializer, 
+    responses={
+        201: FeedbackSerializer,
+        400: 'Bad request',
+        404: 'Course not found',
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_feedback(request, course_id):
@@ -89,6 +133,15 @@ def create_feedback(request, course_id):
         
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='post', 
+    request_body=EnrollmentCreateSerializer, 
+    responses={
+        201: EnrollmentCreateSerializer,
+        400: 'Bad request',
+        404: 'Course not found',
+        405: 'Method not allowed'
+})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_enrollment(request, course_id):
@@ -108,6 +161,17 @@ def create_enrollment(request, course_id):
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    methods=['patch', 'post'], 
+    request_body=EnrollmentUpdateSerializer,
+    responses={
+        200: EnrollmentUpdateSerializer,
+        403: 'You are not authorized to perform this action',
+        404: 'Enrollment not found',
+        405: 'Method not allowed'
+    },
+    operation_description="Toggles the 'blocked' status of an enrollment. Determined server-side - not by the request body."
+)
 @api_view(['POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def update_blocked_status(request, enrollment_id):
@@ -128,6 +192,17 @@ def update_blocked_status(request, enrollment_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    methods=['patch', 'post'], 
+    request_body=NotificationUpdateSerializer,
+    responses={
+        200: NotificationUpdateSerializer,
+        403: 'You are not authorized to perform this action',
+        404: 'Notification not found',
+        405: 'Method not allowed'
+    },
+    operation_description="Toggles the 'read' status of a notification. Determined server-side - not by the request body."
+)
 @api_view(['POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def update_notification_read(request, notification_id):
@@ -148,6 +223,13 @@ def update_notification_read(request, notification_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get', 
+    responses={
+        200: StatusUpdateSerializer(many=True), 
+        404: 'User not found', 
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_status_updates(request, user_id):
@@ -162,7 +244,14 @@ def get_status_updates(request, user_id):
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+@swagger_auto_schema(
+    method='get', 
+    responses={
+        200: EnrollmentsSerializer(many=True), 
+        404: 'User not found', 
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_enrolled_courses(request, user_id):
@@ -178,6 +267,13 @@ def get_enrolled_courses(request, user_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get', 
+    responses={
+        200: CourseSerializer(many=True), 
+        404: 'User not found', 
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_courses_taught(request, user_id):
@@ -193,6 +289,16 @@ def get_courses_taught(request, user_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get', 
+    responses={
+        200: openapi.Response(
+            description="Search Results",
+            schema=SearchResultSerializer
+        ), 
+        404: 'Search query not found', 
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_search_results(request, search_query):
@@ -212,6 +318,13 @@ def get_search_results(request, search_query):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: CourseActivitySerializer(many=True),
+        404: 'Course not found',
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_course_activities_with_materials(request, course_id):
@@ -227,6 +340,13 @@ def get_course_activities_with_materials(request, course_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: FeedbackSerializer(many=True),
+        404: 'Course not found',
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_course_feedback(request, course_id):
@@ -242,6 +362,13 @@ def get_course_feedback(request, course_id):
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: EnrollmentsSerializer(many=True),
+        404: 'Course not found',
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_enrolled_students(request, course_id):
@@ -256,7 +383,14 @@ def get_enrolled_students(request, course_id):
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: NotificationSerializer(many=True),
+        404: 'User not found',
+        405: 'Method not allowed'
+})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_notifications(request, user_id):
@@ -269,6 +403,68 @@ def get_notifications(request, user_id):
         notifications = Notification.objects.filter(recipient=user, read=False).order_by('-created_at')
         serializer = NotificationSerializer(notifications, many=True, context={'request': request})
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: LobbyMessageSerializer(many=True),
+        405: 'Method not allowed'
+})
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_latest_lobby_messages(request):
+    if request.method == 'GET':
+        latest_messages = LobbyMessage.objects.all().order_by('-created_at')[:10]
+        serializer = LobbyMessageSerializer(latest_messages, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@swagger_auto_schema(
+    method='delete',
+    responses={
+        204: 'No Content',
+        403: 'You are not authorized to perform this action',
+        404: 'Status update not found',
+        405: 'Method not allowed'
+})
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_status_update(request, status_update_id):
+    if request.method == 'DELETE':
+        try:
+            status_update = StatusUpdate.objects.get(pk=status_update_id)
+            if request.user != status_update.user:
+                return Response({'message': 'You are not authorized to perform this action'}, status=status.HTTP_403_FORBIDDEN)
+            status_update.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except StatusUpdate.DoesNotExist:
+            return Response({'message': 'Status update not found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@swagger_auto_schema(
+    method='delete',
+    responses={
+        204: 'No Content',
+        403: 'You are not authorized to perform this action',
+        404: 'Course Activity not found',
+        405: 'Method not allowed'
+})
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_course_activity(request, activity_id):
+    if request.method == 'DELETE':
+        try:
+            course_activity = CourseActivity.objects.get(pk=activity_id)
+            if request.user != course_activity.course.teacher:
+                return Response({'message': 'You are not authorized to perform this action'}, status=status.HTTP_403_FORBIDDEN)
+            course_activity.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except CourseActivity.DoesNotExist:
+            return Response({'message': 'Course Activity not found'}, status=status.HTTP_404_NOT_FOUND)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 

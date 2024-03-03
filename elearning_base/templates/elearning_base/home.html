@@ -4,184 +4,215 @@
 {% block main_content %}
 <div class="flex">
     {% if is_own_profile %}
-    <div class="w-3/5 flex flex-col items-center m-5">
-        <!--Profile card-->
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
-            <!--Image Container-->
-            <div class="flex justify-center w-full">
-                <img src="{% if user.profile_img %}{{ user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
-            </div>
-            <!--Text Container-->
-            <div class="text-center w-full mt-4">
-                <div class="font-bold text-5xl mb-2">{{ user.first_name }} {{ user.last_name }}</div>
-                <div class="whitespace-normal p-2">                    
-                    <strong>Username:</strong> {{ user.username }}<br>
-                    <strong>Account type:</strong> {% if user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
-                    <strong>Contact at:</strong> {{ user.email }}<br>
-                    <strong>Date of Birth:</strong> {{ user.date_of_birth|date:"Y-m-d" }}<br>
-                    <strong>Bio:</strong> {{ user.bio }}
+        <div class="w-3/5 flex flex-col items-center m-5">
+            <!--Profile card-->
+            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
+                <!--Image Container-->
+                <div class="flex justify-center w-full">
+                    <img src="{% if user.profile_img %}{{ user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+                </div>
+                <!--Text Container-->
+                <div class="text-center w-full mt-4">
+                    <div class="font-bold text-5xl mb-2">{{ user.first_name }} {{ user.last_name }}</div>
+                    <div class="whitespace-normal p-2">                    
+                        <strong>Username:</strong> {{ user.username }}<br>
+                        <strong>Account type:</strong> {% if user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
+                        <strong>Contact at:</strong> {{ user.email }}<br>
+                        <strong>Date of Birth:</strong> {{ user.date_of_birth|date:"Y-m-d" }}<br>
+                        <strong>Bio:</strong> {{ user.bio }}
+                    </div>
+                </div>
+                <!--Edit Button-->
+                <div class="flex flex-col w-full items-center justify-center space-y-2">
+                    <form action="{% url 'update_profile' %}" method="get" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-white bg-blue-700 
+                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800  
+                    ">Edit Profile</button>
+                    </form>
                 </div>
             </div>
-            <!--Edit Buttons-->
-            <div class="flex flex-col w-full items-center justify-center space-y-2">
-                <form action="{% url 'update_profile' %}" method="get" class="w-full">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full mb-6 text-white bg-blue-700 
-                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800  
-                ">Edit Profile</button>
-                </form>
-                <!--REMEMBER TO UPDATE URL-->
-                <form action="{% url 'update_profile' %}" method="get" class="w-full">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full mt-6 text-white bg-blue-700 
-                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800                
-                ">Change Password</button>
-                </form>
+            <!--Add Status Update Card-->
+            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                    <form id="statusUpdateForm" action="{% url 'create_status_update' %}" method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="w-full text-white bg-blue-700 
+                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Post</button>
+                    </form>
             </div>
-        </div>
-        <!--Add Status Update Card-->
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-                <form id="statusUpdateForm" action="{% url 'create_status_update' %}" method="POST">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="w-full text-white bg-blue-700 
-                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Post</button>
-                </form>
-        </div>
 
-        <!--Status Updates-->
-        {% for status_update in status_updates %}
-        <!--Status Update Card-->
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-            <!--Image Container-->
-            <div class="flex justify-center w-full">
-                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
-            </div>
-            <!--Text Container-->
-            <div class="text-center w-full mt-4">
-                <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
-                <div class="whitespace-normal p-2">
-                    {{ status_update.status }}
+            <!--Status Updates-->
+            {% for status_update in status_updates %}
+            <!--Status Update Card-->
+            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                <!--Image Container-->
+                <div class="flex justify-center w-full">
+                    <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
                 </div>
-                <div>{{ status_update.created_at }}</div>
+                <!--Text Container-->
+                <div class="text-center w-full mt-4">
+                    <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
+                    <div class="whitespace-normal p-2">
+                        {{ status_update.status }}
+                    </div>
+                    <div>{{ status_update.created_at }}</div>
+                </div>
+                <div id="deleteStatusUpdateFromContainer-{{ status_update.status_id }}" class="flex flex-col w-full items-center justify-center mt-4">
+                    <form id="deleteStatusUpdateForm-{{ status_update.status_id }}" data-status-update-id="{{ status_update.status_id }}" action="{% url 'delete_status_update' status_update.status_id %}" method="DELETE">
+                        {% csrf_token %}
+                        <button type="submit" class="text-white bg-red-700 
+                        hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete</button>
+                    </form>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.querySelectorAll('[id^="deleteStatusUpdateForm-"]').forEach(form =>{
+                            form.addEventListener('submit', function(e) {
+                                e.preventDefault();
+
+                                const statusUpdateId = form.getAttribute('data-status-update-id');
+                                fetch(`/api/delete_status_update/${statusUpdateId}/`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        console.log('Status update deleted successfully');
+                                        window.location.reload();
+                                    } else {
+                                        response.json().then(data => {
+                                            throw data;
+                                        })
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Error deleting status update');
+                                })
+                            })
+                        })
+                    })
+                </script>
             </div>
+            {% empty %}
+            <p class="text-lg mt-2">No status updates yet.</p>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p class="text-lg">No status updates yet.</p>
-        {% endfor %}
-    </div>
-    <div class="w-2/5 flex flex-col items-center m-5">
-        {% if user.is_teacher %}
-        <!--Courses taught when profile being viewed is own and is teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
-            <div class="text-center w-full mb-4">
-                <h2 class="font-bold text-3xl">Courses Taught</h2>
+        <div class="w-2/5 flex flex-col items-center m-5">
+            {% if user.is_teacher %}
+            <!--Courses taught when profile being viewed is own and is teacher-->
+            <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
+                <div class="text-center w-full mb-4">
+                    <h2 class="font-bold text-3xl">Courses Taught</h2>
+                </div>
+                <ul class="list-disc pl-5">
+                    {% for course in courses_taught %}
+                    <li class="text-md text-gray-700">
+                        <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
+                    </li>
+                    {% empty %}
+                    <li class="text-lg text-gray-800">No courses taught yet.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <ul class="list-disc pl-5">
-                {% for course in courses_taught %}
-                <li class="text-md text-gray-700">
-                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
-                </li>
-                {% empty %}
-                <li class="text-lg text-gray-800">No courses taught yet.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% else %}
-        <!--Registered Courses card when profile is own and not teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
-            <div class="text-center w-full mb-4">
-                <h2 class="font-bold text-3xl">Registered Courses</h2>
+            {% else %}
+            <!--Registered Courses card when profile is own and not teacher-->
+            <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
+                <div class="text-center w-full mb-4">
+                    <h2 class="font-bold text-3xl">Registered Courses</h2>
+                </div>
+                <ul class="list-disc pl-5">
+                    {% for enrollment in enrolled_courses %}
+                    <li class="text-md text-gray-700">
+                        <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
+                    </li>
+                    {% empty %}
+                    <li class="text-lg text-gray-800">No courses enrolled yet.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <ul class="list-disc pl-5">
-                {% for enrollment in enrolled_courses %}
-                <li class="text-md text-gray-700">
-                    <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
-                </li>
-                {% empty %}
-                <li class="text-lg text-gray-800">No courses enrolled yet.</li>
-                {% endfor %}
-            </ul>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
     {% else %}
-    <div class="w-3/5 flex flex-col items-center m-5">
-        <!--Profile card for viewing other users' profiles-->
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
-            <!--Image Container-->
-            <div class="flex justify-center w-full">
-                <img src="{% if profile_user.profile_img %}{{ profile_user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
-            </div>
-            <!--Text Container-->
-            <div class="text-center w-full mt-4">
-                <div class="font-bold text-5xl mb-2">{{ profile_user.first_name }} {{ profile_user.last_name }}</div>
-                <div class="whitespace-normal p-2">                    
-                    <strong>Username:</strong> {{ profile_user.username }}<br>
-                    <strong>Account type:</strong> {% if profile_user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
-                    <strong>Contact at:</strong> {{ profile_user.email }}<br>
-                    <strong>Date of Birth:</strong> {{ profile_user.date_of_birth|date:"Y-m-d" }}<br>
-                    <strong>Bio:</strong> {{ profile_user.bio }}
+        <div class="w-3/5 flex flex-col items-center m-5">
+            <!--Profile card for viewing other users' profiles-->
+            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
+                <!--Image Container-->
+                <div class="flex justify-center w-full">
+                    <img src="{% if profile_user.profile_img %}{{ profile_user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+                </div>
+                <!--Text Container-->
+                <div class="text-center w-full mt-4">
+                    <div class="font-bold text-5xl mb-2">{{ profile_user.first_name }} {{ profile_user.last_name }}</div>
+                    <div class="whitespace-normal p-2">                    
+                        <strong>Username:</strong> {{ profile_user.username }}<br>
+                        <strong>Account type:</strong> {% if profile_user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
+                        <strong>Contact at:</strong> {{ profile_user.email }}<br>
+                        <strong>Date of Birth:</strong> {{ profile_user.date_of_birth|date:"Y-m-d" }}<br>
+                        <strong>Bio:</strong> {{ profile_user.bio }}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!--Status Updates for other users-->
-        {% for status_update in status_updates %}
-        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-            <div class="flex justify-center w-full">
-                <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
-            </div>
-            <div class="text-center w-full mt-4">
-                <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
-                <div class="whitespace-normal p-2">
-                    {{ status_update.status }}
+            <!--Status Updates for other users-->
+            {% for status_update in status_updates %}
+            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                <div class="flex justify-center w-full">
+                    <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
                 </div>
-                <div>{{ status_update.created_at }}</div>
+                <div class="text-center w-full mt-4">
+                    <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
+                    <div class="whitespace-normal p-2">
+                        {{ status_update.status }}
+                    </div>
+                    <div>{{ status_update.created_at }}</div>
+                </div>
             </div>
+            {% empty %}
+            <p class="text-lg text-gray-800">No status updates yet.</p>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p class="text-lg text-gray-800">No status updates yet.</p>
-        {% endfor %}
-    </div>
-    <div class="w-2/5 flex flex-col items-center m-5">
-        {% if profile_user.is_teacher %}
-        <!--Courses taught when profile being viewed is not own and is teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
-            <div class="text-center w-full mb-4">
-                <h2 class="font-bold text-3xl">Courses Taught</h2>
+        <div class="w-2/5 flex flex-col items-center m-5">
+            {% if profile_user.is_teacher %}
+            <!--Courses taught when profile being viewed is not own and is teacher-->
+            <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
+                <div class="text-center w-full mb-4">
+                    <h2 class="font-bold text-3xl">Courses Taught</h2>
+                </div>
+                <ul class="list-disc pl-5">
+                    {% for course in courses_taught %}
+                    <li class="text-md text-gray-700">
+                        <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
+                    </li>
+                    {% empty %}
+                    <li class="text-lg text-gray-800">No courses taught yet.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <ul class="list-disc pl-5">
-                {% for course in courses_taught %}
-                <li class="text-md text-gray-700">
-                    <strong>{{ course.course_title }}</strong> - Start Date: {{ course.created_at }}
-                </li>
-                {% empty %}
-                <li class="text-lg text-gray-800">No courses taught yet.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% else %}
-        <!--Registered Courses when profile being viewed is not own and is not teacher-->
-        <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
-            <div class="text-center w-full mb-4">
-                <h2 class="font-bold text-3xl">Registered Courses</h2>
+            {% else %}
+            <!--Registered Courses when profile being viewed is not own and is not teacher-->
+            <div class="w-full flex flex-col items-center justify-center bg-slate-400 rounded-lg p-4">
+                <div class="text-center w-full mb-4">
+                    <h2 class="font-bold text-3xl">Registered Courses</h2>
+                </div>
+                <ul class="list-disc pl-5">
+                    {% for enrollment in enrolled_courses %}
+                    <li class="text-md text-gray-700">
+                        <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
+                    </li>
+                    {% empty %}
+                    <li class="text-lg text-gray-800">No courses enrolled yet.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <ul class="list-disc pl-5">
-                {% for enrollment in enrolled_courses %}
-                <li class="text-md text-gray-700">
-                    <strong>{{ enrollment.course.course_title }}</strong> by {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }} - Start Date: {{ enrollment.enrolled_at }}
-                </li>
-                {% empty %}
-                <li class="text-lg text-gray-800">No courses enrolled yet.</li>
-                {% endfor %}
-            </ul>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
     {% endif %}
 </div>
 {% endblock %}

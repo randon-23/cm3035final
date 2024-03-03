@@ -84,90 +84,90 @@
             <p class="text-lg mt-4">No content available.</p>
         {% else %}
             {% if is_creator %}
-            <!-- Button to show the form -->
-            <button id="showCourseActivityForm" class="mt-4 text-white bg-blue-700 
-            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                Add Course Activity
-            </button>
-            <!--Add Course Activity Card (initially hidden)-->
-            <div id="courseActivityFormContainer" style="display: none">
-                <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-                    <form id="courseActivityForm" action="{% url 'create_course_activity' course.course_id %}" method="POST" data-course-id="{{ course.course_id }}">
-                        {% csrf_token %}
-                        {{ course_activity_form.as_p }}
-                        <button type="submit" class="w-full text-white bg-blue-700 
-                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
-                    </form>
+                <!-- Button to show the form -->
+                <button id="showCourseActivityForm" class="mt-4 text-white bg-blue-700 
+                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Add Course Activity
+                </button>
+                <!--Add Course Activity Card (initially hidden)-->
+                <div id="courseActivityFormContainer" style="display: none">
+                    <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                        <form id="courseActivityForm" action="{% url 'create_course_activity' course.course_id %}" method="POST" data-course-id="{{ course.course_id }}">
+                            {% csrf_token %}
+                            {{ course_activity_form.as_p }}
+                            <button type="submit" class="w-full text-white bg-blue-700 
+                            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <script>
-                document.getElementById('showCourseActivityForm').addEventListener('click', function() {
-                    if (document.getElementById('courseActivityFormContainer').style.display == 'none') {
-                        document.getElementById('courseActivityFormContainer').style.display = 'block';
-                    } else {
-                        document.getElementById('courseActivityFormContainer').style.display = 'none';
-                    }
-                })
+                <script>
+                    document.getElementById('showCourseActivityForm').addEventListener('click', function() {
+                        if (document.getElementById('courseActivityFormContainer').style.display == 'none') {
+                            document.getElementById('courseActivityFormContainer').style.display = 'block';
+                        } else {
+                            document.getElementById('courseActivityFormContainer').style.display = 'none';
+                        }
+                    })
 
-                document.getElementById('courseActivityForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
+                    document.getElementById('courseActivityForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
 
-                    const formData = new FormData(this);
-                    const courseId = this.getAttribute('data-course-id');
-                    fetch(`/api/create_course_activity/${courseId}/`, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        },
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        } else if (response.status === 400) {
-                            return response.json().then(data => {
-                                throw data;
-                            });
-                        } 
-                    })
-                    .then(data => {
-                        console.log('Success:', data);
-                        this.reset();
-                        location.reload();
-                    })
-                    .catch(function(error) {
-                        const errorField = Object.keys(error)[0];
-                        const errorMessage = error[errorField][0];
-                        alert(`Error: ${errorField} - ${errorMessage}`);
+                        const formData = new FormData(this);
+                        const courseId = this.getAttribute('data-course-id');
+                        fetch(`/api/create_course_activity/${courseId}/`, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            },
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else if (response.status === 400) {
+                                return response.json().then(data => {
+                                    throw data;
+                                });
+                            } 
+                        })
+                        .then(data => {
+                            console.log('Success:', data);
+                            this.reset();
+                            location.reload();
+                        })
+                        .catch(function(error) {
+                            const errorField = Object.keys(error)[0];
+                            const errorMessage = error[errorField][0];
+                            alert(`Error: ${errorField} - ${errorMessage}`);
+                        });
                     });
-                });
-            </script>
+                </script>
             {% endif %}
 
             <!-- Course Activities -->
             {% for course_activity in course_activities %}
                 <!-- Course Activity Card -->
-                <div class="w-full bg-slate-400 rounded-lg p-4 mt-4">
+                <div class="w-full bg-slate-400 rounded-lg border border-blue-500 p-4 mt-4">
                     <!-- Course Activity Details -->
-                    <div class="text-center w-full">
-                        <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
+                    <div class="text-center w-full rounded-lg border border-blue-500">
                         <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
+                        <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
                         <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
                         <div class="text-md">Created at: {{ course_activity.created_at }}</div>
                         {% if course_activity.deadline %}
-                        <div class="text-md">Deadline: {{ course_activity.deadline }}</div>
+                        <div class="text-md mt-4">Deadline: {{ course_activity.deadline }}</div>
                         {% else %}
-                        <div class="text-md">No deadline</div>
+                        <div class="text-md mt-4">No deadline</div>
                         {% endif %}
                     </div>
                     <!-- Course Activity Materials -->
                     {% if course_activity.activity_materials %}
                     <div class="mt-4">
-                        <h3 class="font-bold text-2xl mb-2">Materials</h3>
+                        <h3 class="font-bold text-center text-2xl mb-2">Materials</h3>
                         {% for material in course_activity.activity_materials %}
-                            <div class="bg-slate-300 rounded-lg p-2 mb-2">
+                            <div class="bg-slate-300 rounded-lg border border-blue-500 self-start max-w-md p-2 mb-2">
                                 <div class="font-bold">{{ material.material_title }}</div>
                                 <p>{{ material.description }}</p>
                                 {% if material.file %}
@@ -183,14 +183,22 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                        <p class="text-lg mt-4">No materials added yet.</p>
+                        <p class="text-lg text-center mt-4">No materials added yet.</p>
                     {% endif %}
                     {% if is_creator %}
-                        <button class="show-add-material-btn mt-4 text-white bg-blue-700 
-                            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
-                                Add Course Activity Material
-                        </button>
+                        <div class="flex items-center space-x-4 mt-4">
+                            <button id="addMaterialBtn-{{ course_activity.activity_id }}" class="text-white bg-blue-700 
+                                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
+                                    Add Course Activity Material
+                            </button>
+                            <form id="deleteCourseActivityForm-{{ course_activity.activity_id }}" data-course-activity-id="{{ course_activity.activity_id }}" action="{% url 'delete_course_activity' course_activity.activity_id %}" method="DELETE">
+                                {% csrf_token %}
+                                <button type="submit" class="text-white bg-red-700 
+                                hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+                                text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete Course Activity</button>
+                            </form>
+                        </div>
                         <!--Course Activity Material Form Container (initially hidden)-->
                         <div id="addMaterialFormContainer-{{ course_activity.activity_id }}" style="display: none">
                             <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
@@ -204,61 +212,14 @@
                                 </form>
                             </div>
                         </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                document.querySelectorAll('.show-add-material-btn').forEach(button => {
-                                    button.addEventListener('click', function() {
-                                        const courseActivityId = this.getAttribute('data-course-activity-id');
-                                        if (document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display == 'none') {
-                                            document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'block';
-                                        } else {
-                                            document.getElementById(`addMaterialFormContainer-${courseActivityId}`).style.display = 'none';
-                                        }
-                                    })
-                                })
-                            })
-                            document.addEventListener('DOMContentLoaded', function() {
-                                document.querySelectorAll('[id^="addMaterialForm-"]').forEach(form => {
-                                    form.addEventListener('submit', function(e) {
-                                        e.preventDefault();
-
-                                        const formData = new FormData(this);
-                                        const courseActivityId = this.getAttribute('data-course-activity-id');
-                                        fetch(`/api/create_course_activity_material/${courseActivityId}/`, {
-                                            method: 'POST',
-                                            body: formData,
-                                            headers: {
-                                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                            },
-                                        })
-                                        .then(response => {
-                                            if (response.ok) {
-                                                return response.json();
-                                            } else if (response.status === 400) {
-                                                return response.json().then(data => {
-                                                    throw data;
-                                                });
-                                            } 
-                                        })
-                                        .then(data => {
-                                            console.log('Success:', data);
-                                            this.reset();
-                                            location.reload();
-                                        })
-                                        .catch(function(error) {
-                                            const errorField = Object.keys(error)[0];
-                                            const errorMessage = error[errorField][0];
-                                            alert(`Error: ${errorField} - ${errorMessage}`);
-                                        });
-                                    });
-                                });
-                            });
-                        </script>
                     {% endif %}
                 </div>
-                {% empty %}
+            {% empty %}
                 <p class="text-lg text-center">No course activities yet.</p>
             {% endfor %}
+            {% if is_creator %}
+                <script src="{% static 'elearning_base/js/course_activity_material.js' %}"></script>
+            {% endif %}
         {% endif %}
     </div>
     <div class="w-2/5 flex flex-col items-center m-5">

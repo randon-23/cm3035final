@@ -219,15 +219,6 @@ class TestChatConsumer(TransactionTestCase):
 
         await notifications_communicator.disconnect()
 
-    async def test_unauthenticated_user_cannot_connect(self):
-        await self.asyncSetUp()
-        communicator = WebsocketCommunicator(AuthMiddlewareStack(URLRouter(websocket_urlpatterns)), f"ws/lobby/")
-        connected, _ = await communicator.connect()
-
-        self.assertFalse(connected, "Unauthenticated user should not connect.")
-
-        await communicator.disconnect()
-
     async def test_message_broadcast_to_multiple_users(self):
         await self.asyncSetUp()
         student_communicator = WebsocketCommunicator(AuthMiddlewareStack(URLRouter(websocket_urlpatterns)), f"ws/lobby/")

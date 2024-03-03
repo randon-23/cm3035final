@@ -7,8 +7,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    #Traditional views
+    path('', views.home_view, name='home'),
     path('login/', views.login_view, name='login'),
-    path('home/', views.home_view, name='home'),
     path('users/<int:user_id>/', views.user_profile_view, name='user_profile'),
     path('register/', views.register_view, name='register'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
@@ -39,6 +40,9 @@ urlpatterns = [
     path('api/get_course_feedback/<int:course_id>/', api.get_course_feedback, name='get_course_feedback'),
     path('api/get_course_activities/<int:course_id>/', api.get_course_activities_with_materials, name='get_course_activities_with_materials'),
     path('api/get_notifications/<int:user_id>/', api.get_notifications, name='get_notifications'),
+    path('api/get_latest_lobby_messages/', api.get_latest_lobby_messages, name='get_latest_lobby_messages'),
+    path('api/delete_status_update/<int:status_update_id>/', api.delete_status_update, name='delete_status_update'),
+    path('api/delete_course_activity/<int:activity_id>/', api.delete_course_activity, name='delete_course_activity'),
 ]
 
 if settings.DEBUG:

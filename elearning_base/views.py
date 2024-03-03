@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.core.paginator import Paginator
 import json
 from .models import *
@@ -23,7 +22,6 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                #next_url = request.GET.get('next', 'home')
                 return redirect('home')
     else:
         form = CustomAuthenticationForm()
@@ -243,4 +241,10 @@ def notifications_view(request):
 
 @login_required
 def lobby_view(request):
-    return render(request, 'elearning_base/lobby.html')
+    latest_messages_response = get_latest_lobby_messages(request)
+    latest_messages = json.loads(latest_messages_response.content) if latest_messages_response.status_code == 200 else []
+
+    context = {
+        'latest_messages': latest_messages
+    }
+    return render(request, 'elearning_base/lobby.html', context)
