@@ -46,62 +46,31 @@
 
             <!--Status Updates-->
             {% for status_update in status_updates %}
-            <!--Status Update Card-->
-            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
-                <!--Image Container-->
-                <div class="flex justify-center w-full">
-                    <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
-                </div>
-                <!--Text Container-->
-                <div class="text-center w-full mt-4">
-                    <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
-                    <div class="whitespace-normal p-2">
-                        {{ status_update.status }}
+                <!--Status Update Card-->
+                <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                    <!--Image Container-->
+                    <div class="flex justify-center w-full">
+                        <img src="{% if status_update.user.profile_img %}{{ status_update.user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-24 h-24 rounded-full">
                     </div>
-                    <div>{{ status_update.created_at }}</div>
+                    <!--Text Container-->
+                    <div class="text-center w-full mt-4">
+                        <div class="font-bold text-3xl mb-2">{{ status_update.user.username }}</div>
+                        <div class="whitespace-normal p-2">
+                            {{ status_update.status }}
+                        </div>
+                        <div>{{ status_update.created_at }}</div>
+                    </div>
+                    <div id="deleteStatusUpdateFromContainer-{{ status_update.status_id }}" class="flex flex-col w-full items-center justify-center mt-4">
+                        <form id="deleteStatusUpdateForm-{{ status_update.status_id }}" data-status-update-id="{{ status_update.status_id }}" action="{% url 'delete_status_update' status_update.status_id %}" method="DELETE">
+                            {% csrf_token %}
+                            <button type="submit" class="text-white bg-red-700 
+                            hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+                            text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete</button>
+                        </form>
+                    </div>
                 </div>
-                <div id="deleteStatusUpdateFromContainer-{{ status_update.status_id }}" class="flex flex-col w-full items-center justify-center mt-4">
-                    <form id="deleteStatusUpdateForm-{{ status_update.status_id }}" data-status-update-id="{{ status_update.status_id }}" action="{% url 'delete_status_update' status_update.status_id %}" method="DELETE">
-                        {% csrf_token %}
-                        <button type="submit" class="text-white bg-red-700 
-                        hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
-                        text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete</button>
-                    </form>
-                </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        document.querySelectorAll('[id^="deleteStatusUpdateForm-"]').forEach(form =>{
-                            form.addEventListener('submit', function(e) {
-                                e.preventDefault();
-
-                                const statusUpdateId = form.getAttribute('data-status-update-id');
-                                fetch(`/api/delete_status_update/${statusUpdateId}/`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                    }
-                                })
-                                .then(response => {
-                                    if (response.ok) {
-                                        console.log('Status update deleted successfully');
-                                        window.location.reload();
-                                    } else {
-                                        response.json().then(data => {
-                                            throw data;
-                                        })
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('Error deleting status update');
-                                })
-                            })
-                        })
-                    })
-                </script>
-            </div>
             {% empty %}
-            <p class="text-lg mt-2">No status updates yet.</p>
+                <p class="text-lg mt-2">No status updates yet.</p>
             {% endfor %}
         </div>
         <div class="w-2/5 flex flex-col items-center m-5">
@@ -215,4 +184,5 @@
         </div>
     {% endif %}
 </div>
+<script src="{% static 'elearning_base/js/status_update.js' %}"></script>
 {% endblock %}

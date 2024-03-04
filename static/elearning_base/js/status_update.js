@@ -33,3 +33,31 @@ document.getElementById('statusUpdateForm').addEventListener('submit', function(
     });
 });
 
+document.querySelectorAll('[id^="deleteStatusUpdateForm-"]').forEach(form =>{
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const statusUpdateId = form.getAttribute('data-status-update-id');
+        fetch(`/api/delete_status_update/${statusUpdateId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Status update deleted successfully');
+                window.location.reload();
+            } else {
+                response.json().then(data => {
+                    throw data;
+                })
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting status update');
+        })
+    })
+})
+

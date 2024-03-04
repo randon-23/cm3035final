@@ -4,33 +4,15 @@
 {% block main_content %}
 <div class="flex justify-center items-center space-x-4 m-5">
     {% if not is_enrolled and not user.is_teacher %}
-    <form id="enrollForm" method="POST" action="{% url 'create_enrollment' course.course_id %}">
-        {% csrf_token %}
-        <button type="submit" class="ml-4 text-white bg-green-700 
-                hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg 
-                text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
-            Enroll
-        </button>
-    </form>
-    <script>
-        document.getElementById('enrollForm').addEventListener('submit', function(e) {
-        e.preventDefault(); 
-
-        const url = this.action;
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-        }).then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error('Form submission failed');
-            }
-        }).catch(error => console.error('Error:', error));
-    });
-    </script>
+        <form id="enrollForm" method="POST" action="{% url 'create_enrollment' course.course_id %}">
+            {% csrf_token %}
+            <button type="submit" class="ml-4 text-white bg-green-700 
+                    hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg 
+                    text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                Enroll
+            </button>
+        </form>
+        <script src="{% static 'elearning_base/js/enroll_form.js' %}"></script>
     {% elif is_enrolled and not user.is_teacher and not is_blocked %}
     <button disabled class="mb-6 text-white bg-slate-400 
         hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg 
@@ -102,48 +84,7 @@
                         </form>
                     </div>
                 </div>
-                <script>
-                    document.getElementById('showCourseActivityForm').addEventListener('click', function() {
-                        if (document.getElementById('courseActivityFormContainer').style.display == 'none') {
-                            document.getElementById('courseActivityFormContainer').style.display = 'block';
-                        } else {
-                            document.getElementById('courseActivityFormContainer').style.display = 'none';
-                        }
-                    })
-
-                    document.getElementById('courseActivityForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-
-                        const formData = new FormData(this);
-                        const courseId = this.getAttribute('data-course-id');
-                        fetch(`/api/create_course_activity/${courseId}/`, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                            },
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                return response.json();
-                            } else if (response.status === 400) {
-                                return response.json().then(data => {
-                                    throw data;
-                                });
-                            } 
-                        })
-                        .then(data => {
-                            console.log('Success:', data);
-                            this.reset();
-                            location.reload();
-                        })
-                        .catch(function(error) {
-                            const errorField = Object.keys(error)[0];
-                            const errorMessage = error[errorField][0];
-                            alert(`Error: ${errorField} - ${errorMessage}`);
-                        });
-                    });
-                </script>
+                <script src="{% static 'elearning_base/js/course_activity.js' %}"></script>
             {% endif %}
 
             <!-- Course Activities -->
@@ -224,77 +165,44 @@
     </div>
     <div class="w-2/5 flex flex-col items-center m-5">
         {% if is_blocked %}
-        <h2 class="font-bold text-3xl mb-4">You are currently <strong>Blocked</strong> from this course</h2>
+            <h2 class="font-bold text-3xl mb-4">You are currently <strong>Blocked</strong> from this course</h2>
         {% else %}
             <h2 class="font-bold text-3xl mb-4">Feedback</h2>
             {% if is_enrolled and not user.is_teacher%}
-            <!--Add Feedback Card-->
-            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
-                <form id="feedbackForm" action="{% url 'create_feedback' course.course_id %}" method="POST" class="flex items-center w-full" data-course-id="{{ course.course_id }}">
-                    {% csrf_token %}
-                    <div class="flex-grow">
-                        {{ feedback_form.as_p }}
-                    </div>
-                    <button type="submit" class="ml-4 text-white bg-blue-700 
-                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        Post Feedback
-                    </button>
-                </form>
-            </div>
-            <script>
-                document.getElementById('feedbackForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const formData = new FormData(this);
-                    const courseId = this.getAttribute('data-course-id');
-                    fetch(`/api/create_feedback/${courseId}/`, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        },
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json(); // For HTTP 201 Created
-                        } else if (response.status === 400) {
-                            return response.json().then(data => {
-                                throw data; // Throw the data to be caught in the catch block
-                            });
-                        } else {
-                            throw new Error('Something went wrong on server side.'); // For other server-side errors
-                        }
-                    })
-                    .then(data => {
-                        console.log('Success:', data);
-                        this.reset();
-                        location.reload();
-                    })
-                    .catch(function(error) {
-                        console.error('Error:', error);
-                    });
-                });
-            </script>
+                <!--Add Feedback Card-->
+                <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+                    <form id="feedbackForm" action="{% url 'create_feedback' course.course_id %}" method="POST" class="flex items-center w-full" data-course-id="{{ course.course_id }}">
+                        {% csrf_token %}
+                        <div class="flex-grow">
+                            {{ feedback_form.as_p }}
+                        </div>
+                        <button type="submit" class="ml-4 text-white bg-blue-700 
+                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Post Feedback
+                        </button>
+                    </form>
+                </div>
+                <script src="{% static 'elearning_base/js/feedback.js'%}"></script>
             {% endif %}
             <!-- Course Feedback -->
             {% for feedback in course_feedback %}
-            <div class="bg-slate-400 shadow-lg rounded-lg p-4 mt-4 w-full">
-                <div class="mr-4">
-                    <img src="{% if feedback.student.profile_img %}{{ feedback.student.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-10 h-10 rounded-full">
-                </div>
-                <div>
-                    <div class="font-bold text-lg mb-2">{{ feedback.student.username }}</div>
-                    <p class="text-gray-700 text-2xl text-center mb-4">
-                        {{ feedback.feedback }}
-                    </p>
-                    <div class="text-gray-600 text-sm">
-                        Posted on: {{ feedback.created_at }}
+                <div class="bg-slate-400 shadow-lg rounded-lg p-4 mt-4 w-full">
+                    <div class="mr-4">
+                        <img src="{% if feedback.student.profile_img %}{{ feedback.student.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-10 h-10 rounded-full">
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg mb-2">{{ feedback.student.username }}</div>
+                        <p class="text-gray-700 text-2xl text-center mb-4">
+                            {{ feedback.feedback }}
+                        </p>
+                        <div class="text-gray-600 text-sm">
+                            Posted on: {{ feedback.created_at }}
+                        </div>
                     </div>
                 </div>
-            </div>
             {% empty %}
-            <p class="text-lg">No feedback has been provided yet.</p>
+                <p class="text-lg">No feedback has been provided yet.</p>
             {% endfor %}
         {% endif %}
     </div>

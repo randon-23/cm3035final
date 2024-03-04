@@ -54,7 +54,7 @@ def send_new_material_notification(student_id, course_activity, course, material
         notification = Notification.objects.create(
             title="New Material",
             recipient=student,
-            message=f"New material {material_title} added to following course -> activity: {course.course_title} -> {course_activity.activity_title}"
+            message=f"New material {material_title} added to course '{course.course_title}'  -> activity: '{course_activity.activity_title}'"
         )
         # Send notification via channels to all enrolled students
 
@@ -81,7 +81,7 @@ def send_new_activity_notification(student_id, course, activity_title):
         notification = Notification.objects.create(
             title="New Activity",
             recipient=student,
-            message=f"New activity {activity_title} added to following course -> {course.course_title}"
+            message=f"New activity {activity_title} added course '{course.course_title}'"
         )
 
         # Send notification via channels to all enrolled students
