@@ -35,7 +35,7 @@
         style="
             background: linear-gradient(to right, #00C9A7, #00B4D8, #0096C7, #0057D9);
         ">LOG IN</button>
-        <a href="{% url 'password_reset' %}" class="text-center">Forgot password?</a>
+        <!--<a class="text-center">Forgot password?</a>-->
 
         <div class="flex items-center justify-between py-6">
             <p class="mb-0 mr-4">Don't have an account? </p>
@@ -49,15 +49,5 @@
 {% block content_right %}
     <h2 class="text-5xl font-semibold mb-10">Learning, re-imagined</h2>
     <p class="text-center text-3xl">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="message {{ message.tags }}">
-                {{ message }}
-            </div>"
-        {% endfor %}
-    </div>
-    {% endif %}
 {% endblock %}
 

@@ -30,7 +30,7 @@ class UserProfile(AbstractUser):
     profile_img = models.ImageField(upload_to=user_img_directory_path, blank=True)
 
     def __str__(self):
-        return f"Username: {self.username}\nEmail: {self.email}\nIs Teacher? {self.is_teacher}"
+        return f"Username: {self.username}\nIs Teacher? {self.is_teacher}"
 
     def clean(self):
         if '@' not in self.email:
@@ -64,22 +64,6 @@ class Course(models.Model):
     def clean(self):
         if self.teacher.is_teacher == False:
             raise ValidationError("Only teachers can create courses")
-    
-class Tag(models.Model):
-    tag_name = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    
-    def __str__(self):
-        return f"{self.tag_name}"
-
-class CourseTag(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_tags')
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='course_tags')
-
-    def __str__(self):
-        return f"{self.course}\nTag: {self.tag}"
-    
-    class Meta:
-        unique_together = ('course', 'tag')
 
 # Bridge table for the many-to-many relationship between UserProfile and Course
 class Enrollments(models.Model):
@@ -102,7 +86,7 @@ class Enrollments(models.Model):
     blocked = models.BooleanField(default=False, null=False, blank=False)
 
     def __str__(self):
-        return f"{self.student}\n\n{self.course}"
+        return f"{self.student}\n{self.course}"
     
     def clean(self):
         if self.student.is_teacher == True:
@@ -115,6 +99,8 @@ class Enrollments(models.Model):
     def save(self, *args, **kwargs):
         if self.blocked and self.status != self.BLOCKED:
             self.status = self.BLOCKED
+        elif not self.blocked and self.status == self.BLOCKED:
+            self.status = self.ACTIVE
         super(Enrollments, self).save(*args, **kwargs)
     
     class Meta:
@@ -199,11 +185,44 @@ class StatusUpdate(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='status_updates')
     status = models.TextField(max_length=1000, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.status_id}"
+    
+class Feedback(models.Model):
+    feedback_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='feedback')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='feedback')
+    feedback = models.TextField(max_length=1000, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.feedback_id}"
+    
+    def clean(self):
+        if self.student.is_teacher == True:
+            raise ValidationError("Only students can provide feedback")
+
+class Notification(models.Model):
+    notification_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=100, blank=False, null=False)
+    message = models.TextField(max_length=1000, blank=False, null=False)
+    recipient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='notifications')
+    read = models.BooleanField(default=False, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.notification_id}"
+    
+class LobbyMessage(models.Model):
+    message_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='lobby_messages')
+    message = models.TextField(max_length=1000, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.message_id}"
+    
     
 #Why overwrite model save function to automatically clean when saving?
 #Ensures model is always validated before saving to the database

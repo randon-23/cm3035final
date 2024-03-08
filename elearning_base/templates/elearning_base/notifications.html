@@ -1,0 +1,53 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+
+{% block main_content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-xl text-center font-semibold mb-4">Notifications Inbox</h1>
+    <div class="shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y">
+            {% for notification in notifications %}
+                <li class="bg-slate-400 px-4 py-4 mb-4 flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center">
+                        <div class="text-xl font-medium text-white">
+                            {{ notification.title }}
+                        </div>
+                        <div class="ml-2 flex-shrink-0 flex">
+                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                {{ notification.message }} at {{ notification.created_at }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-shrink-0">
+                        <button data-notification-id="{{ notification.notification_id }}" class="toggle-read-status m-4 inline-block text-white font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out {{ notification.read|yesno:'bg-gray-700, bg-blue-500 hover:bg-blue-700' }}" {% if notification.read %}disabled{% endif %}>
+                            {{ notification.read|yesno:'Read,Mark as Read' }}
+                        </button>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="px-4 py-4">No notifications found.</li>
+            {% endfor %}
+        </ul>
+        <script src="{% static 'elearning_base/js/notifications.js' %}"></script>
+    </div>
+    <div class="flex justify-between items-center mt-4">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="text-white 
+            bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+            font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">Previous</a>
+        {% else %}
+            <div></div>
+        {% endif %}
+
+        <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="text-white 
+            bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+            font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">Next</a>
+        {% else %}
+            <div></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

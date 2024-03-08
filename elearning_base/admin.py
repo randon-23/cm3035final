@@ -7,12 +7,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('course_id', 'course_title', 'description', 'teacher')
 
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('tag_name',)
-
-class CourseTagAdmin(admin.ModelAdmin):
-    list_display = ('course', 'tag')
-
 class EnrollmentsAdmin(admin.ModelAdmin):
     list_display = ('enrollment_id', 'course', 'student')
 
@@ -25,11 +19,25 @@ class CourseActivityMaterialAdmin(admin.ModelAdmin):
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('submission_id', 'student', 'course_activity', 'file', 'grade')
 
+class StatusUpdateAdmin(admin.ModelAdmin):
+    list_display = ('status_id', 'user', 'status', 'created_at')
+
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ('feedback_id', 'course', 'student', 'feedback', 'created_at')
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('notification_id', 'recipient', 'title', 'message', 'read', 'created_at')
+
+class LobbyMessageAdmin(admin.ModelAdmin):
+    list_display = ('message_id', 'user', 'message', 'created_at')
+
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(CourseTag, CourseTagAdmin)
 admin.site.register(Enrollments, EnrollmentsAdmin)
 admin.site.register(CourseActivity, CourseActivityAdmin)
 admin.site.register(CourseActivityMaterial, CourseActivityMaterialAdmin)
 admin.site.register(Submission, SubmissionAdmin)
+admin.site.register(StatusUpdate, StatusUpdateAdmin)
+admin.site.register(Feedback, FeedbackAdmin)
+admin.site.register(Notification, NotificationAdmin)
+admin.site.register(LobbyMessage, LobbyMessageAdmin)

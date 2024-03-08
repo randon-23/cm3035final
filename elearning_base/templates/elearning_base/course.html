@@ -1,0 +1,215 @@
+{% extends "base_authenticated.html"%}
+{% load static %}
+
+{% block main_content %}
+<div class="flex justify-center items-center space-x-4 m-5">
+    {% if not is_enrolled and not user.is_teacher %}
+        <form id="enrollForm" method="POST" action="{% url 'create_enrollment' course.course_id %}">
+            {% csrf_token %}
+            <button type="submit" class="ml-4 text-white bg-green-700 
+                    hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg 
+                    text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                Enroll
+            </button>
+        </form>
+        <script src="{% static 'elearning_base/js/enroll_form.js' %}"></script>
+    {% elif is_enrolled and not user.is_teacher and not is_blocked %}
+    <button disabled class="mb-6 text-white bg-slate-400 
+        hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800  
+    ">Enrolled</button>
+    {% elif user.is_teacher and not is_creator %}
+    <button disabled class="mb-6 text-white bg-slate-400 
+        hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800  
+    ">Teachers cannot enroll</button>
+    {% elif is_blocked %}
+    <button disabled class="mb-6 text-white bg-red-700 
+        hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800
+    ">Blocked</button>
+    {% elif is_creator %}
+    <button disabled class="mb-6 text-white bg-slate-400 
+        hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800  
+    ">You are the course creator</button>
+    <!--Enrolled Students page-->
+    <form action="{% url 'enrolled_students' course.course_id %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="mb-6 text-white bg-blue-700 
+        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800  
+    ">View Enrolled Students</button>
+    </form>
+    {% endif %}
+</div>
+<div class="flex">
+    <div class="w-3/5 flex flex-col items-center m-5">
+        <!--Profile card-->
+        <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
+            <!--Image Container-->
+            <div class="flex justify-center w-full">
+                <img src="{% if course.course_img %}{{ course.course_img.url }}{% else %}{% static 'images/default_course.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+            </div>
+            <!--Text Container-->
+            <div class="text-center w-full mt-4">
+                <div class="font-bold text-5xl mb-2">{{ course.course_title }}</div>
+                <div class="whitespace-normal p-2">
+                    <strong>Course ID:</strong> {{ course.course_id }}<br>                    
+                    <strong>Description:</strong> {{ course.description }}<br>
+                    <strong>Teacher:</strong> {{ course.teacher.username }} - {{ course.teacher.first_name }} {{ course.teacher.last_name }}<br>
+                    <strong>Course created on: {{ course.created_at }}</strong>
+                </div>
+            </div>
+        </div>
+        {%if is_blocked %}
+            <p class="text-lg mt-4">No content available.</p>
+        {% else %}
+            {% if is_creator %}
+                <!-- Button to show the form -->
+                <button id="showCourseActivityForm" class="mt-4 text-white bg-blue-700 
+                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Add Course Activity
+                </button>
+                <!--Add Course Activity Card (initially hidden)-->
+                <div id="courseActivityFormContainer" style="display: none">
+                    <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                        <form id="courseActivityForm" action="{% url 'create_course_activity' course.course_id %}" method="POST" data-course-id="{{ course.course_id }}">
+                            {% csrf_token %}
+                            {{ course_activity_form.as_p }}
+                            <button type="submit" class="w-full text-white bg-blue-700 
+                            hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                            text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
+                        </form>
+                    </div>
+                </div>
+                <script src="{% static 'elearning_base/js/course_activity.js' %}"></script>
+            {% endif %}
+
+            <!-- Course Activities -->
+            {% for course_activity in course_activities %}
+                <!-- Course Activity Card -->
+                <div class="w-full bg-slate-400 rounded-lg border border-blue-500 p-4 mt-4">
+                    <!-- Course Activity Details -->
+                    <div class="text-center w-full rounded-lg border border-blue-500">
+                        <div class="text-xl mb-2">{{ course_activity.activity_type }}</div>
+                        <div class="font-bold text-3xl mb-2">{{ course_activity.activity_title }}</div>
+                        <p class="whitespace-normal mb-2">{{ course_activity.description }}</p>
+                        <div class="text-md">Created at: {{ course_activity.created_at }}</div>
+                        {% if course_activity.deadline %}
+                        <div class="text-md mt-4">Deadline: {{ course_activity.deadline }}</div>
+                        {% else %}
+                        <div class="text-md mt-4">No deadline</div>
+                        {% endif %}
+                    </div>
+                    <!-- Course Activity Materials -->
+                    {% if course_activity.activity_materials %}
+                    <div class="mt-4">
+                        <h3 class="font-bold text-center text-2xl mb-2">Materials</h3>
+                        {% for material in course_activity.activity_materials %}
+                            <div class="bg-slate-300 rounded-lg border border-blue-500 self-start max-w-md p-2 mb-2">
+                                <div class="font-bold">{{ material.material_title }}</div>
+                                <p>{{ material.description }}</p>
+                                {% if material.file %}
+                                <a href="{{ material.file.url }}" class="text-blue-500 hover:text-blue-700">Download File</a>
+                                {% endif %}
+                                {% if material.video_link %}
+                                <a href="{{ material.video_link }}" class="text-blue-500 hover:text-blue-700">View Video</a>
+                                {% endif %}
+                                {% if material.image %}
+                                <img src="{{ material.image.url }}" alt="Material Image" class="max-h-40 w-auto mt-2">
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                        <p class="text-lg text-center mt-4">No materials added yet.</p>
+                    {% endif %}
+                    {% if is_creator %}
+                        <div class="flex items-center space-x-4 mt-4">
+                            <button id="addMaterialBtn-{{ course_activity.activity_id }}" class="text-white bg-blue-700 
+                                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-course-activity-id="{{ course_activity.activity_id }}">
+                                    Add Course Activity Material
+                            </button>
+                            <form id="deleteCourseActivityForm-{{ course_activity.activity_id }}" data-course-activity-id="{{ course_activity.activity_id }}" action="{% url 'delete_course_activity' course_activity.activity_id %}" method="DELETE">
+                                {% csrf_token %}
+                                <button type="submit" class="text-white bg-red-700 
+                                hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+                                text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete Course Activity</button>
+                            </form>
+                        </div>
+                        <!--Course Activity Material Form Container (initially hidden)-->
+                        <div id="addMaterialFormContainer-{{ course_activity.activity_id }}" style="display: none">
+                            <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4 space-x-4">
+                                <!-- Adjust the form ID and action URL as needed -->
+                                <form id="addMaterialForm-{{ course_activity.activity_id }}" data-course-activity-id="{{ course_activity.activity_id }}" action="{% url 'create_course_activity_material' course_activity.activity_id %}" method="POST">
+                                    {% csrf_token %}
+                                    {{ course_activity_material_form.as_p }}
+                                    <button type="submit" class="w-full text-white bg-blue-700 
+                                    hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                                    text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="text-lg text-center mt-4">
+                    <p>No course activities available to view.</p>
+                    {% if not is_enrolled and not is_teacher_viewer %}
+                        <p>You must be enrolled in this course to view course activities. If you are interested in this course, consider <a href="{% url 'enroll_course' course_id=course.course_id %}" class="text-blue-500 hover:text-blue-700">enrolling</a>.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if is_creator %}
+                <script src="{% static 'elearning_base/js/course_activity_material.js' %}"></script>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="w-2/5 flex flex-col items-center m-5">
+        {% if is_blocked %}
+            <h2 class="font-bold text-3xl mb-4">You are currently <strong>Blocked</strong> from this course</h2>
+        {% else %}
+            <h2 class="font-bold text-3xl mb-4">Feedback</h2>
+            {% if is_enrolled and not user.is_teacher%}
+                <!--Add Feedback Card-->
+                <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 mt-4">
+                    <form id="feedbackForm" action="{% url 'create_feedback' course.course_id %}" method="POST" class="flex items-center w-full" data-course-id="{{ course.course_id }}">
+                        {% csrf_token %}
+                        <div class="flex-grow">
+                            {{ feedback_form.as_p }}
+                        </div>
+                        <button type="submit" class="ml-4 text-white bg-blue-700 
+                        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                        text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Post Feedback
+                        </button>
+                    </form>
+                </div>
+                <script src="{% static 'elearning_base/js/feedback.js'%}"></script>
+            {% endif %}
+            <!-- Course Feedback -->
+            {% for feedback in course_feedback %}
+                <div class="bg-slate-400 shadow-lg rounded-lg p-4 mt-4 w-full">
+                    <div class="mr-4">
+                        <img src="{% if feedback.student.profile_img %}{{ feedback.student.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-10 h-10 rounded-full">
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg mb-2">{{ feedback.student.username }}</div>
+                        <p class="text-gray-700 text-2xl text-center mb-4">
+                            {{ feedback.feedback }}
+                        </p>
+                        <div class="text-gray-600 text-sm">
+                            Posted on: {{ feedback.created_at }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-lg">No feedback has been provided yet.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

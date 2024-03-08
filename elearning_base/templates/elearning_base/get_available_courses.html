@@ -1,0 +1,54 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+{% block main_content %}
+
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-semibold mb-4 text-center">Available Courses</h2>
+    <div class="flex overflow-x-auto items-center justify-center">
+        <table class="min-w-full table-auto shadow-md rounded-lg items-center justify-center">
+            <thead class="bg-slate-400">
+                <tr>
+                    <th class="px-4 py-2 text-left">Course ID</th>
+                    <th class="px-4 py-2 text-left">Course Title</th>
+                    <th class="px-4 py-2 text-left">Course Description</th>
+                    <th class="px-4 py-2 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for course in courses %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2 text-white">{{ course.course_id }}</td>
+                        <td class="px-4 py-2 text-white">{{ course.course_title }}</td>
+                        <td class="px-4 py-2 text-white">{{ course.description }}</td>
+                        <td class="px-4 py-2 text-white">
+                            <a href="{% url 'course_page' course.course_id %}" class="inline-block text-white 
+                                bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+                                font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">View Course</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="flex justify-between items-center mt-4">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="text-white 
+            bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+            font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">Previous</a>
+        {% else %}
+            <div></div>
+        {% endif %}
+
+        <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="text-white 
+            bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+            font-medium rounded-lg text-sm px-4 py-2 transition duration-300 ease-in-out">Next</a>
+        {% else %}
+            <div></div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

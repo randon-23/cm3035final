@@ -1,0 +1,56 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+{% block main_content %}
+<div class="container mx-auto p-4">
+    {% if user.is_teacher %}
+    <h2 class="text-2xl font-semibold mb-4">Courses Taught</h2>
+    <div class="flex flex-wrap -mx-2">
+        {% for course in courses_taught %}
+        <div class="p-2 w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
+            <div class="bg-slate-400 text-center shadow-lg rounded-lg m-6 p-4 flex flex-col items-stretch h-full">
+                <div class="flex justify-center">
+                    <img src="{% if course.course_img %}{{ course.course_img }}{% else %}{% static 'images/default_course.png' %}{% endif %}" alt="Course Image" class="w-48 h-48 rounded-full">
+                </div>
+                <h3 class="font-bold text-xl mb-2">{{ course.course_title }}</h3>
+                <p class="flex-grow">{{ course.description|truncatewords:20 }}</p>
+                <a href="{{ course.url }}" class="mt-4 text-center text-white bg-blue-700 
+                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Course</a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No courses taught.</p>
+        {% endfor %}
+    </div>
+    {% else %}
+    <h2 class="text-2xl font-semibold mb-4">Enrolled Courses</h2>
+    <div class="flex flex-wrap -mx-2">
+        {% for enrollment in enrolled_courses %}
+        <div class="p-2 w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
+            <div class="bg-slate-400 text-center shadow-lg rounded-lg m-6 p-4 flex flex-col items-stretch h-full">
+                <div class="flex justify-center">
+                    <img src="{% if enrollment.course.course_img %}{{ enrollment.course.course_img }}{% else %}{% static 'images/default_course.png' %}{% endif %}" alt="Course Image" class="w-48 h-48 rounded-full">
+                </div>
+                <h3 class="font-bold text-xl mb-2">{{ enrollment.course.course_title }}</h3>
+                <p class="flex-grow">{{ enrollment.course.description }}</p>
+                <p class="flex-grow
+                    {% if enrollment.status == 'Active' %}text-blue-700
+                    {% elif enrollment.status == 'Inactive' %}text-black
+                    {% elif enrollment.status == 'Complete' %}text-green-700
+                    {% elif enrollment.status == 'Blocked' %}text-red-700
+                    {% endif %}
+                    ">
+                    {{ enrollment.status }}
+                </p>
+                <a href="{{ enrollment.course.url }}" class="mt-4 text-center text-white bg-blue-700 
+                hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
+                text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Course</a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No courses enrolled.</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

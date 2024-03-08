@@ -1,6 +1,8 @@
 from django import forms
-from .models import UserProfile, StatusUpdate
+from .models import UserProfile, StatusUpdate, Course, Feedback, CourseActivity, CourseActivityMaterial, Submission
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+import datetime
+from django.utils import timezone
 
 class UserForm(UserCreationForm):
     username = forms.CharField(max_length=100, required=True, label='Your Username')
@@ -91,4 +93,69 @@ class StatusUpdateForm(forms.ModelForm):
         fields = ['status']
         widgets = {
             'status': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s up?'}),
-        } 
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(StatusUpdateForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white'
+            })
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['course_title', 'description', 'course_img']
+
+    def __init__(self, *args, **kwargs):
+        super(CourseForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                'placeholder': field.label
+            })
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['feedback']
+        widgets = {
+            'feedback': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What do you think about the course?'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(FeedbackForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white'
+            })
+
+class CourseActivityForm(forms.ModelForm):
+    class Meta:
+        model = CourseActivity
+        fields = ['activity_title', 'description', 'activity_type', 'deadline']
+        widgets = {
+            'activity_type': forms.Select(choices=CourseActivity.COURSE_ACTIVITY_TYPES),
+            'deadline': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(CourseActivityForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                'placeholder': field.label
+            })
+
+class CourseActivityMaterialForm(forms.ModelForm):
+    class Meta:
+        model = CourseActivityMaterial
+        fields = ['material_title', 'description', 'file', 'video_link', 'image']
+    
+    def __init__(self, *args, **kwargs):
+        super(CourseActivityMaterialForm, self).__init__(*args, **kwargs)
+        for fieldname, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'w-full text-2xl p-3 border border-gray-700 rounded bg-primary text-white',
+                'placeholder': field.label
+            })

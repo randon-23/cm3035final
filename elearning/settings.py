@@ -33,13 +33,16 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'elearning_base.apps.ElearningBaseConfig',
+    'rest_framework',
+    'channels',
+    'daphne',
+    'drf_yasg',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -71,6 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'elearning.wsgi.application'
+ASGI_APPLICATION = 'elearning.asgi.application'
 
 
 # Database
@@ -141,3 +145,29 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
+SWAGGER_LOGOUT_URL = 'swagger_logout'
+
+#Celery settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+#Channels settings
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        }
+    }
+}
+
+#Swagger settings
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+    'USE_SESSION_AUTH': True,
+    'LOGIN_URL': LOGIN_URL,
+    'LOGOUT_URL': SWAGGER_LOGOUT_URL,
+}

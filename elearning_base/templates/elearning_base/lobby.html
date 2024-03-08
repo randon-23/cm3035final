@@ -1,0 +1,33 @@
+{% extends "base_authenticated.html" %}
+{% load static %}
+
+{% block main_content %}
+<div id="lobbyContainer" class="container h-screen mx-auto px-4 py-2" data-username="{{ user.username }}">
+    <h2 class="text-center text-2xl font-semibold mb-4">Welcome to the lobby!</h2>
+
+    <div class="flex flex-col h-4/5 mx-5">
+        <!-- Chat messages display area -->
+        <div id="chatMessages" class="flex flex-col flex-grow overflow-y-auto p-5 border border-gray-300 rounded mb-4">
+            <!-- Latest 10 messages as page is loaded-->
+            {% for message in latest_messages %}
+                <div class="{% if message.user.username == user.username %}self-end bg-blue-500{% else %}self-start bg-slate-400 text-black{% endif %} p-2 my-2 rounded shadow max-w-1/2">
+                    <p class="text-xs font-semibold">{{ message.user.username }} {% if message.user.is_teacher %}(Teacher){% else %}(Student){% endif %} says:</p>
+                    <p class="text-sm">{{ message.message }}</p>
+                </div>
+            {% endfor %}
+            <!-- Dynamically loaded live chat messages -->
+        </div>
+
+        <!-- Message input and send button -->
+        <div class="flex-none p-4">
+            <div class="flex">
+                <input type="text" id="messageInput" placeholder="Type a message..." class="flex-grow mr-2 p-2 border text-black border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="sendMessage" class="p-2 border border-transparent rounded bg-blue-500 text-white cursor-pointer hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Chat specific websocket scripts-->
+<script src="{% static 'elearning_base/js/chat_ws.js' %}"></script>
+{% endblock %}
