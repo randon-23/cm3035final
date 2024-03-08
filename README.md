@@ -30,7 +30,7 @@ command ###sudo systemctl enable redis-server.service###
 # Migrations and database set up
 The project requirements stipulate the need for teacher and students accounts set up in the SQLite3 database. If this
 was not the case, the .sqlite3 file won't be included in the submission and a new .sqlite3 file will be created by
-running the command ###python mange.py migrate### which would run the migrations. However, given this is not the case
+running the command ###python manage.py migrate### which would run the migrations. However, given this is not the case
 the command only needs to be run just in case, and account credentials will be included in the report. Admin credentials
 would also need to be set up using ###python manage.py createsuperuser### if no .sqlite3 is set up, but once again,
 this is not the case with this submission
