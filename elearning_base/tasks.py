@@ -39,7 +39,9 @@ def send_enrollment_notification(enrollment_id):
             {
                 "type": "dynamic.subscription",
                 "material_group": course_material_group,
-                "activity_group": course_activity_group
+                "activity_group": course_activity_group,
+                "title": enrollment.course.course_title,
+                "message": f"Welcome to {enrollment.course.course_title}! You will now receive notifications for new materials and activities in this course."
             }
         )
     except Enrollments.DoesNotExist:

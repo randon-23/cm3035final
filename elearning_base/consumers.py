@@ -120,12 +120,16 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def dynamic_subscription(self, event):
         material_group = event["material_group"]
         activity_group = event["activity_group"]
+        title = event["title"]
+        message = event["message"]
         await self.channel_layer.group_add(material_group, self.channel_name)
         await self.channel_layer.group_add(activity_group, self.channel_name)
 
         await self.send(text_data=json.dumps({
             "material_group": material_group,
-            "activity_group": activity_group
+            "activity_group": activity_group,
+            "title": title,
+            "message": message
         }))
     
     async def chat_notification(self, event):
