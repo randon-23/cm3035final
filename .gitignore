@@ -4,4 +4,3 @@ venv_elearning/
 celery.pid
 __pycache__/
 *.pyc
-media/
