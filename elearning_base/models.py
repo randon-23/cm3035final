@@ -86,7 +86,7 @@ class Enrollments(models.Model):
     blocked = models.BooleanField(default=False, null=False, blank=False)
 
     def __str__(self):
-        return f"{self.student}\n\n{self.course}"
+        return f"{self.student}\n{self.course}"
     
     def clean(self):
         if self.student.is_teacher == True:

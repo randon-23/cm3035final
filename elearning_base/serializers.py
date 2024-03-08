@@ -1,11 +1,33 @@
 from rest_framework import serializers
 from .models import *
-from datetime import datetime
+from django.contrib.auth.password_validation import validate_password
+
+#Used exclusively for rest interface in development and direct calls not involving forms
+class UserProfileCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+
+    class Meta:
+        model = UserProfile
+        fields = ['username', 'first_name', 'last_name', 'is_teacher', 'email', 'date_of_birth', 'bio', 'password', 'profile_img']
+    
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+    
+    #Disallow changing the is_teacher field after user has been created
+    def validate_is_teacher(self, value):
+        if self.instance and self.instance.is_teacher != value:
+            raise serializers.ValidationError("is_teacher field cannot be changed.")
+        return value
+
+    def create(self, validated_data):
+        user = UserProfile.objects.create_user(**validated_data)
+        return user
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['url', 'username', 'first_name', 'last_name', 'is_teacher', 'profile_img']
+        fields = ['url', 'username', 'first_name', 'last_name', 'is_teacher', 'profile_img', 'email', 'date_of_birth', 'bio']
         extra_kwargs = {
             'url': {'view_name': 'user_profile', 'lookup_field': 'user_id'}
         }
@@ -13,7 +35,7 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 class StatusUpdateSerializer(serializers.ModelSerializer):
     # Nested serializer to include user details in the response
     user = UserProfileSerializer(read_only=True) 
-    #Customizing/overriding the errro field for a blank status
+    #Customizing/overriding the error field for a blank status
     status = serializers.CharField(error_messages={'blank': 'Status update cannot be empty.'})
 
     class Meta:
@@ -59,6 +81,8 @@ class CourseCreateSerializer(serializers.ModelSerializer):
         if request and hasattr(request, "user"):
             user = request.user
             teacher = UserProfile.objects.get(user_id=user.user_id)
+            if not teacher.is_teacher:
+                raise serializers.ValidationError("Only teachers can create courses.")
         else:
             raise serializers.ValidationError("Teacher must be set but corresponding user not found.")
         

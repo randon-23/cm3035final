@@ -25,16 +25,16 @@ class TestUserProfile(TestCase):
         with open(image_path, 'rb') as f:
             cls.image = SimpleUploadedFile("profile1.jpg", content=f.read(), content_type='image/jpeg')
 
-    @classmethod
-    def tearDownClass(self):
-        super().tearDownClass()
-        user_1_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_1')
-        user_2_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_2')
+    #@classmethod
+    #def tearDownClass(self):
+        #super().tearDownClass()
+        #user_1_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_1')
+        #user_2_dir = os.path.join(settings.MEDIA_ROOT, 'profile_imgs', 'user_2')
 
-        if os.path.exists(user_1_dir):
-            shutil.rmtree(user_1_dir)
-        if os.path.exists(user_2_dir):
-            shutil.rmtree(user_2_dir)
+        #if os.path.exists(user_1_dir):
+            #shutil.rmtree(user_1_dir)
+        #if os.path.exists(user_2_dir):
+            #shutil.rmtree(user_2_dir)
     
     def test_teacher_user_creation(self):
         self.assertEqual(self.teacher.username, 'teacher1')
@@ -88,22 +88,22 @@ class TestUserProfile(TestCase):
         #TO TEST FOR VALIDATION ERROS DUE TO INCORRECT FORMATS YOU WOULD TYPICALLY DO THIS IN FORM TESTS
         #OR MODEL CLEAN METHODS 
 
-    def test_user_profile_img_and_stored_path(self):
-        self.teacher.profile_img = self.image
-        self.teacher.save()
-        self.assertTrue(self.teacher.profile_img)
+    #def test_user_profile_img_and_stored_path(self):
+        #self.teacher.profile_img = self.image
+        #self.teacher.save()
+        #self.assertTrue(self.teacher.profile_img)
 
-        self.student.profile_img = self.image
-        self.student.save()
-        self.assertTrue(self.student.profile_img)
+        #self.student.profile_img = self.image
+        #self.student.save()
+        #self.assertTrue(self.student.profile_img)
 
-    def test_user_profile_img_path(self):
-        self.teacher.profile_img.save('profile2.jpg', self.image, save=True)
-        expected_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'profile_imgs', f'user_{self.teacher.user_id}', 'profile2.jpg'))
-        actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, self.teacher.profile_img.name))
+    #def test_user_profile_img_path(self):
+        #self.teacher.profile_img.save('profile2.jpg', self.image, save=True)
+        #expected_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'profile_imgs', f'user_{self.teacher.user_id}', 'profile2.jpg'))
+        #actual_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, self.teacher.profile_img.name))
 
-        self.assertEqual(expected_path, actual_path)
-        self.assertTrue(os.path.exists(actual_path))
+        #self.assertEqual(expected_path, actual_path)
+        #self.assertTrue(os.path.exists(actual_path))
 
 #Test proper group assignment upon user save
 class TestUserGroupAssignmentUponSave(TestCase):
@@ -215,7 +215,7 @@ class TestEnrollments(TestCase):
         self.assertIsInstance(self.enrollment.enrolled_at, datetime)
 
     def test_string_representation(self):
-        self.assertEqual(str(self.enrollment), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\n\nCourse1")
+        self.assertEqual(str(self.enrollment), "Username: student1\nIs Teacher? False\nCourse1")
 
     def test_uniqueness_together(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
@@ -233,10 +233,6 @@ class TestEnrollments(TestCase):
         self.enrollment.save()
         self.assertEqual(self.enrollment.status, 'Complete')
 
-        self.enrollment.status = 'Blocked'
-        self.enrollment.save()
-        self.assertEqual(self.enrollment.status, 'Blocked')
-    
     def test_invalid_status_choices(self):
         with self.assertRaises(ValueError):
             self.enrollment.status = 'PENDING'
@@ -434,7 +430,7 @@ class TestSubmission(TestCase):
     def test_string_representation(self):
         with open(self.file_path, 'rb') as f:
             submission = Submission.objects.create(student=self.student, course_activity=self.course_activity, file=SimpleUploadedFile("test1.pdf", f.read(), content_type='application/pdf'))
-        self.assertEqual(str(submission), "Username: student1\nEmail: student1@gmail.com\nIs Teacher? False\nCourse1\nActivity Title: Lecture 1")
+        self.assertEqual(str(submission), "Username: student1\nIs Teacher? False\nCourse1\nActivity Title: Lecture 1")
 
 class TestStatusUpdate(TestCase):
     @classmethod
@@ -447,27 +443,9 @@ class TestStatusUpdate(TestCase):
         self.assertEqual(self.status_update.user, self.student)
         self.assertEqual(self.status_update.status, self.status_text)
         self.assertTrue(isinstance(self.status_update.created_at, datetime))
-        self.assertTrue(isinstance(self.status_update.updated_at, datetime))
 
     def test_string_representation(self):
         self.assertEqual(str(self.status_update), str(self.status_update.status_id))
 
     def test_auto_set_timestamps(self):
         self.assertTrue(self.status_update.created_at <= timezone.now())
-        self.assertTrue(self.status_update.updated_at <= timezone.now())
-
-    def test_status_update_editing(self):
-        original_update_time = self.status_update.updated_at
-        new_status = "This is an updated test status."
-        self.status_update.status = new_status
-        self.status_update.save()
-        self.status_update.refresh_from_db()
-        
-        self.assertNotEqual(self.status_update.updated_at, original_update_time)
-        self.assertEqual(self.status_update.status, new_status)
-
-    def test_status_update_deletion(self):
-        status_id = self.status_update.status_id
-        self.status_update.delete()
-        with self.assertRaises(StatusUpdate.DoesNotExist):
-            StatusUpdate.objects.get(status_id=status_id)

@@ -43,8 +43,15 @@ def register_view(request):
 class LogoutView(LogoutView):
     next_page = 'login'
 
+#Swagger logout view - only used in development
+def swagger_logout_view(request):
+    logout(request)
+    return redirect('schema-swagger-ui')
+
 @login_required
 def home_view(request):
+    #In the users own profile, we are not retrieving the user profile via api call as we are in user_profile_view
+    #But instead we are using the user object already available in the request
     status_update_form = StatusUpdateForm()
     status_update_response = get_status_updates(request, request.user.user_id)
     if status_update_response.status_code == 200:
@@ -89,13 +96,16 @@ def user_profile_view(request, user_id):
     #And so when a user accesses their own profile, they should be able to see the status update form
     status_update_form = StatusUpdateForm()
 
-    profile_user=get_object_or_404(UserProfile, pk=user_id)
     is_own_profile = request.user.user_id == user_id
+
+    profile_user_response=get_user_api(request, user_id)
+    profile_user = json.loads(profile_user_response.content) if profile_user_response.status_code == 200 else {}
+    print(profile_user)
 
     status_update_response = get_status_updates(request, user_id)
     status_updates = json.loads(status_update_response.content) if status_update_response.status_code == 200 else {}
     
-    if profile_user.is_teacher:
+    if profile_user.get('is_teacher'):
         courses_taught_response = get_courses_taught(request, user_id)
         courses_taught = json.loads(courses_taught_response.content) if courses_taught_response.status_code == 200 else {}
         

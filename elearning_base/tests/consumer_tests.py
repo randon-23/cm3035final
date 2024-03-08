@@ -128,13 +128,13 @@ class TestChatConsumer(TransactionTestCase):
         await channel_layer.group_send(lobby_group, {
             "type": "chat.message",
             "message": "Test message",
-            "user": self.student.username,
+            "username": self.student.username,
             "is_teacher": self.student.is_teacher
         })
 
         response = await lobby_communicator.receive_json_from()
         self.assertEqual(response["message"], "Test message")
-        self.assertEqual(response["user"], self.student.username)
+        self.assertEqual(response["username"], self.student.username)
         self.assertEqual(response["is_teacher"], self.student.is_teacher)
 
         await lobby_communicator.disconnect()
@@ -231,14 +231,15 @@ class TestChatConsumer(TransactionTestCase):
 
         channel_layer = get_channel_layer()
         lobby_group = f'public_lobby'
-        test_message = {"type": "chat.message", "message": "Hello, world!", "user": self.student.username, "is_teacher": self.student.is_teacher}
+        test_message = {"message": "Hello, world!", "username": self.student.username, "is_teacher": self.student.is_teacher, 'type': "chat.message"}
         await channel_layer.group_send(lobby_group, test_message)
 
+        expected_message = {"message": "Hello, world!", "username": self.student.username, "is_teacher": self.student.is_teacher}
         response1 = await student_communicator.receive_json_from()
         response2 = await teacher_communicator.receive_json_from()
 
-        self.assertEqual(response1, test_message)
-        self.assertEqual(response2, test_message)
+        self.assertEqual(response1, expected_message)
+        self.assertEqual(response2, expected_message)
 
         await student_communicator.disconnect()
         await teacher_communicator.disconnect()

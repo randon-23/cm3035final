@@ -156,7 +156,12 @@
                     {% endif %}
                 </div>
             {% empty %}
-                <p class="text-lg text-center">No course activities yet.</p>
+                <div class="text-lg text-center mt-4">
+                    <p>No course activities available to view.</p>
+                    {% if not is_enrolled and not is_teacher_viewer %}
+                        <p>You must be enrolled in this course to view course activities. If you are interested in this course, consider <a href="{% url 'enroll_course' course_id=course.course_id %}" class="text-blue-500 hover:text-blue-700">enrolling</a>.</p>
+                    {% endif %}
+                </div>
             {% endfor %}
             {% if is_creator %}
                 <script src="{% static 'elearning_base/js/course_activity_material.js' %}"></script>

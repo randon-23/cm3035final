@@ -114,7 +114,7 @@
             <div class="w-full flex items-center justify-center bg-slate-400 rounded-lg p-4 space-x-4">
                 <!--Image Container-->
                 <div class="flex justify-center w-full">
-                    <img src="{% if profile_user.profile_img %}{{ profile_user.profile_img.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
+                    <img src="{% if profile_user.profile_img %}{{ profile_user.profile_img }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Profile Image" class="w-48 h-48 rounded-full">
                 </div>
                 <!--Text Container-->
                 <div class="text-center w-full mt-4">
@@ -123,7 +123,7 @@
                         <strong>Username:</strong> {{ profile_user.username }}<br>
                         <strong>Account type:</strong> {% if profile_user.is_teacher %}Teacher{% else %}Student{% endif %}<br>
                         <strong>Contact at:</strong> {{ profile_user.email }}<br>
-                        <strong>Date of Birth:</strong> {{ profile_user.date_of_birth|date:"Y-m-d" }}<br>
+                        <strong>Date of Birth:</strong> {{ profile_user.date_of_birth }}<br>
                         <strong>Bio:</strong> {{ profile_user.bio }}
                     </div>
                 </div>
@@ -144,7 +144,7 @@
                 </div>
             </div>
             {% empty %}
-            <p class="text-lg text-gray-800">No status updates yet.</p>
+                <p class="text-lg text-white">No status updates yet.</p>
             {% endfor %}
         </div>
         <div class="w-2/5 flex flex-col items-center m-5">

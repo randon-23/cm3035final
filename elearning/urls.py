@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.conf import settings
 from rest_framework import permissions
 
 schema_view = get_schema_view(
@@ -27,13 +28,19 @@ schema_view = get_schema_view(
         description="API for Elearning project",
         contact=openapi.Contact(email="sm4621@stmartins.edu"),
     ),
-    public=True,
-    permission_classes=(permissions.IsAuthenticated,),
+    public=False,
+    #permission_classes=(permissions.IsAuthenticated,),
+    #By removing the above permission_classes, we are allwoing the API exposure to be decided at the endpoint level
 )
 
 urlpatterns = [
     path('', include('elearning_base.urls')),
     path('admin/', admin.site.urls),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
+# Set to visible only in development mode
+if settings.DEBUG:
+    urlpatterns +=  [
+        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]

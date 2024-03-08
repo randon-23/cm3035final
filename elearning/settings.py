@@ -145,6 +145,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
+SWAGGER_LOGOUT_URL = 'swagger_logout'
 
 #Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -162,10 +163,11 @@ CHANNEL_LAYERS = {
 #Swagger settings
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Token': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
+        'basic': {
+            'type': 'basic'
         }
-    }
+    },
+    'USE_SESSION_AUTH': True,
+    'LOGIN_URL': LOGIN_URL,
+    'LOGOUT_URL': SWAGGER_LOGOUT_URL,
 }
