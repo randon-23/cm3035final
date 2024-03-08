@@ -43,11 +43,15 @@ class TestNotificationConsumer(TransactionTestCase):
         user_group = f"user_notifications_{self.student.user_id}"
         material_group = f"new_material_notifications_{self.course.course_id}"
         activity_group = f"new_activity_notifications_{self.course.course_id}"
+        title = "Test Course"
+        message = f"Test welcome message"
 
         await channel_layer.group_send(user_group, {
             "type": "dynamic.subscription", 
             "material_group": material_group, 
-            "activity_group": activity_group
+            "activity_group": activity_group,
+            "title": title,
+            "message": message
         })
 
         response = await communicator.receive_json_from()
