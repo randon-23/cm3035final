@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure--(wrr9#&g_uv4hry=3=s&m_i!wk%5uxu0^w$-0o=44y^v2bwzy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -97,6 +97,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 #Paths where media files are stored and served from
 MEDIA_URL = '/media/'
