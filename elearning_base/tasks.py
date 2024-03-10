@@ -31,6 +31,8 @@ def send_enrollment_notification(enrollment_id):
         )
 
         # Notify corresponding enrollment student client to subscribe to course-specific notifications
+        # Dynamically adds user to course-specific notification groups when they enroll in a new course
+        # Without this, the user will not receive any notifications for the new course until they refresh the page (resubscribe to the notification consumer)
         student_personal_group = f"user_notifications_{enrollment.student.user_id}"
         course_material_group = f"new_material_notifications_{enrollment.course.course_id}"
         course_activity_group = f"new_activity_notifications_{enrollment.course.course_id}"
