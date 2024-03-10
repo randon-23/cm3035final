@@ -8,6 +8,9 @@ from channels.layers import get_channel_layer
 User = get_user_model()
 log = get_task_logger(__name__)
 
+#Celery tasks which are triggered by Django signals. These tasks are used t osend notifications via channels to the client side upon creation of 
+#new activities, materials, enrollments and lobby messages.
+
 @shared_task(autoretry_for=(Exception,), retry_backoff=True)
 def send_enrollment_notification(enrollment_id):
     try:

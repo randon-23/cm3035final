@@ -12,6 +12,9 @@ from .api import *
 #redirect when successful action that modifies data to prevent duplicate submissions if the user refreshes
 #render when displaying data or template with context directly to user without changing URL in browser
 
+# Traditional django views which handle the rendering of templates, processing of forms, 
+#and calling of api functions to retrieve data from the backend to be unified in the template context object and displayed in the frontend.
+
 def login_view(request):
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)

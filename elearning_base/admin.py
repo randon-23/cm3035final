@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import *
 
+#Admin classes to display the models in the Django admin interface
+
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user_id', 'username','email', 'is_teacher', 'date_of_birth', 'bio')
 

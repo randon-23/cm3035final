@@ -122,7 +122,9 @@ def delete_user_api(request, user_id):
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     else:
         return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+# API endpoints for the rest of the models to create, update, dlete and get serialized data from the back-end
+
 @swagger_auto_schema(
     method='post', 
     request_body=StatusUpdateSerializer, 

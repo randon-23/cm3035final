@@ -5,6 +5,8 @@ from .tasks import send_enrollment_notification, send_new_material_notification,
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+#Django signals are used to perform some action after a particular event is triggered, specifically the creation of a new object in the database.
+
 @receiver(post_save, sender=Enrollments)
 def enrollment_notification(sender, instance, created, **kwargs):
     if created:

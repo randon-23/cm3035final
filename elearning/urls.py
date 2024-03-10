@@ -21,6 +21,7 @@ from drf_yasg import openapi
 from django.conf import settings
 from rest_framework import permissions
 
+# Swagger/OpenAPI documentation configuration 
 schema_view = get_schema_view(
     openapi.Info(
         title="Elearning API",
@@ -38,7 +39,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
-# Set to visible only in development mode
+# Set to access API documentation only in development mode
 if settings.DEBUG:
     urlpatterns +=  [
         path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
