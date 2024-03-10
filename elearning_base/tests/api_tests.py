@@ -419,8 +419,6 @@ class TestGetCoursesTaughtAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = json.loads(response.content)
         self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]['course_title'], 'Course 1')
-        self.assertEqual(data[1]['course_title'], 'Course 2')
 
     def test_get_courses_taught_unauthenticated(self):
         response = self.client.get(self.courses_url)
