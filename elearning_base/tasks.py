@@ -62,18 +62,16 @@ def send_new_material_notification(student_id, course_activity, course, material
         )
         # Send notification via channels to all enrolled students
 
-        channel_layer = get_channel_layer
-        enrollments = Enrollments.objects.filter(course=course)
-        for enrollment in enrollments:
-            group_name = f"new_material_notifications_{enrollment.student.user_id}"
-            async_to_sync(channel_layer.group_send)(
-                group_name,
-                {
-                    "type": "new.notification",
-                    "message": notification.message,
-                    "title": notification.title
-                }
-            )
+        channel_layer = get_channel_layer()
+        group_name = f"new_material_notifications_{course.course_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "new.notification",
+                "message": notification.message,
+                "title": notification.title
+            }
+        )
     except (User.DoesNotExist, CourseActivity.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new material notification")
 
@@ -90,16 +88,14 @@ def send_new_activity_notification(student_id, course, activity_title):
 
         # Send notification via channels to all enrolled students
         channel_layer = get_channel_layer()
-        enrollments = Enrollments.objects.filter(course=course)
-        for enrollment in enrollments:
-            group_name = f"new_activity_notifications_{enrollment.student.user_id}"
-            async_to_sync(channel_layer.group_send)(
-                group_name,
-                {
-                    "type": "new.notification",
-                    "message": notification.message,
-                    "title": notification.title
-                }
-            )
+        group_name = f"new_activity_notifications_{course.course_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "new.notification",
+                "message": notification.message,
+                "title": notification.title
+            }
+        )
     except (User.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new activity notification")
