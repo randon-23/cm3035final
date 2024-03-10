@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 from django.utils import timezone
 
+
+# These are custom directory paths for the files and images uploaded to the model fields.
 def user_img_directory_path(instance, filename):
     return 'profile_imgs/user_{0}/{1}'.format(instance.user_id, filename)
 

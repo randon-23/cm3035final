@@ -8,6 +8,9 @@ from channels.layers import get_channel_layer
 User = get_user_model()
 log = get_task_logger(__name__)
 
+#Celery tasks which are triggered by Django signals. These tasks are used t osend notifications via channels to the client side upon creation of 
+#new activities, materials, enrollments and lobby messages.
+
 @shared_task(autoretry_for=(Exception,), retry_backoff=True)
 def send_enrollment_notification(enrollment_id):
     try:
@@ -31,6 +34,8 @@ def send_enrollment_notification(enrollment_id):
         )
 
         # Notify corresponding enrollment student client to subscribe to course-specific notifications
+        # Dynamically adds user to course-specific notification groups when they enroll in a new course
+        # Without this, the user will not receive any notifications for the new course until they refresh the page (resubscribe to the notification consumer)
         student_personal_group = f"user_notifications_{enrollment.student.user_id}"
         course_material_group = f"new_material_notifications_{enrollment.course.course_id}"
         course_activity_group = f"new_activity_notifications_{enrollment.course.course_id}"
@@ -60,18 +65,16 @@ def send_new_material_notification(student_id, course_activity, course, material
         )
         # Send notification via channels to all enrolled students
 
-        channel_layer = get_channel_layer
-        enrollments = Enrollments.objects.filter(course=course)
-        for enrollment in enrollments:
-            group_name = f"new_material_notifications_{enrollment.student.user_id}"
-            async_to_sync(channel_layer.group_send)(
-                group_name,
-                {
-                    "type": "new.notification",
-                    "message": notification.message,
-                    "title": notification.title
-                }
-            )
+        channel_layer = get_channel_layer()
+        group_name = f"new_material_notifications_{course.course_id}_{student.user_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "new.notification",
+                "message": notification.message,
+                "title": notification.title
+            }
+        )
     except (User.DoesNotExist, CourseActivity.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new material notification")
 
@@ -88,16 +91,14 @@ def send_new_activity_notification(student_id, course, activity_title):
 
         # Send notification via channels to all enrolled students
         channel_layer = get_channel_layer()
-        enrollments = Enrollments.objects.filter(course=course)
-        for enrollment in enrollments:
-            group_name = f"new_activity_notifications_{enrollment.student.user_id}"
-            async_to_sync(channel_layer.group_send)(
-                group_name,
-                {
-                    "type": "new.notification",
-                    "message": notification.message,
-                    "title": notification.title
-                }
-            )
+        group_name = f"new_activity_notifications_{course.course_id}_{student.user_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "new.notification",
+                "message": notification.message,
+                "title": notification.title
+            }
+        )
     except (User.DoesNotExist, Course.DoesNotExist):
         log.error("Error in sending new activity notification")

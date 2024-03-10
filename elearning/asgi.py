@@ -19,6 +19,8 @@ from elearning_base.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'elearning.settings')
 
+#ASGI configuration file for the elearning project - sets up application routing for HTTP and websocket protocol connections
+
 django_asgi_app = get_asgi_application()
 import elearning_base.routing
 

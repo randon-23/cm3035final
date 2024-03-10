@@ -5,6 +5,8 @@ from .tasks import send_enrollment_notification, send_new_material_notification,
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+#Django signals are used to perform some action after a particular event is triggered, specifically the creation of a new object in the database.
+
 @receiver(post_save, sender=Enrollments)
 def enrollment_notification(sender, instance, created, **kwargs):
     if created:
@@ -24,6 +26,7 @@ def course_activity_notification(sender, instance, created, **kwargs):
         for student_id in student_ids:
             send_new_activity_notification.delay(student_id, instance.course.course_id, instance.activity_title)
 
+# Signal to notify all users in the public lobby about new messages, toggles the "NEW" indicator on left pane
 @receiver(post_save, sender=LobbyMessage)
 def lobby_message(sender, instance, created, **kwargs):
     if created:

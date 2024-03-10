@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import *
 from django.contrib.auth.password_validation import validate_password
 
+#Serializers here are used to convert complex data types such as querysets and model instances to native Python datatypes that can be rendered into JSON.
+#Some serializers are handling the creation of new objects (Create would be in the serializer name), to validate the data and create the object.
+
 #Used exclusively for rest interface in development and direct calls not involving forms
 class UserProfileCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})

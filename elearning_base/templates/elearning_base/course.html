@@ -112,13 +112,13 @@
                                 <div class="font-bold">{{ material.material_title }}</div>
                                 <p>{{ material.description }}</p>
                                 {% if material.file %}
-                                <a href="{{ material.file.url }}" class="text-blue-500 hover:text-blue-700">Download File</a>
+                                <a href="{{ material.file }}" class="text-blue-500 hover:text-blue-700">Download File</a>
                                 {% endif %}
                                 {% if material.video_link %}
                                 <a href="{{ material.video_link }}" class="text-blue-500 hover:text-blue-700">View Video</a>
                                 {% endif %}
                                 {% if material.image %}
-                                <img src="{{ material.image.url }}" alt="Material Image" class="max-h-40 w-auto mt-2">
+                                <img src="{{ material.image }}" alt="Material Image" class="max-h-40 w-auto mt-2">
                                 {% endif %}
                             </div>
                         {% endfor %}
@@ -159,7 +159,7 @@
                 <div class="text-lg text-center mt-4">
                     <p>No course activities available to view.</p>
                     {% if not is_enrolled and not is_teacher_viewer %}
-                        <p>You must be enrolled in this course to view course activities. If you are interested in this course, consider <a href="{% url 'enroll_course' course_id=course.course_id %}" class="text-blue-500 hover:text-blue-700">enrolling</a>.</p>
+                        <p>You must be enrolled in this course to view course activities. If you are interested in this course, consider enrolling</p>
                     {% endif %}
                 </div>
             {% endfor %}

@@ -1,6 +1,10 @@
 from django.core.exceptions import ValidationError
 import re
 
+# Custom validator to ensure that the user's password meets the minimum requirements
+# This is used in the User model to ensure that the password meets the minimum requirements
+#and is enforced through the AUTH_PASSWORD_VALIDATORS setting in the settings.py file
+
 class UserPasswordValidator:
     def validate(self, password, user=None):
         if not re.search(r'[A-Z]', password):

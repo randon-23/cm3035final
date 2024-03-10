@@ -4,6 +4,10 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 import datetime
 from django.utils import timezone
 
+#Forms which are displayed in a varied manner in the application. Some forms encompass a whole template, whilst
+#others are displayed dynamically as part of other elements to allow for dynamic user experience and facilitate
+#API calls to the backend through user input
+
 class UserForm(UserCreationForm):
     username = forms.CharField(max_length=100, required=True, label='Your Username')
     email = forms.EmailField(required=True, label='Your Email')

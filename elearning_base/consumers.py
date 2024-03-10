@@ -4,6 +4,17 @@ from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from .models import Enrollments, LobbyMessage, UserProfile
 
+#These consumers are used to handle websocket connections and messages sent asynchrously
+#between client side and server side
+
+#Notification consumer is also used to not only send notification messages to client side, but also
+#to inform client that new messages are being sent in the public lobby
+
+#Chat consumer is used to handle messages sent whilst users are in the public lobby
+
+#In fact, the notifications consumer is perpetualyl being connected to as it is present in the base_authenticated.html template
+#Whereas the chat consumer is only connected to when the user is in the public lobby template/webpage
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = await self.get_user()
@@ -83,8 +94,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             
             # Student notifications
             for course_id in self.enrolled_courses:
-                material_group = f"new_material_notifications_{course_id}"
-                activity_group = f"new_activity_notifications_{course_id}"
+                material_group = f"new_material_notifications_{course_id}_{self.user.user_id}"
+                activity_group = f"new_activity_notifications_{course_id}_{self.user.user_id}"
                 await self.channel_layer.group_add(material_group, self.channel_name)
                 await self.channel_layer.group_add(activity_group, self.channel_name)
 
@@ -104,8 +115,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             
             # Student notifications
             for course_id in self.enrolled_courses:
-                material_group = f"new_material_notifications_{course_id}"
-                activity_group = f"new_activity_notifications_{course_id}"
+                material_group = f"new_material_notifications_{course_id}_{self.user.user_id}"
+                activity_group = f"new_activity_notifications_{course_id}_{self.user.user_id}"
                 await self.channel_layer.group_discard(material_group, self.channel_name)
                 await self.channel_layer.group_discard(activity_group, self.channel_name)
 
