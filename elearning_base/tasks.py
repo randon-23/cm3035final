@@ -63,7 +63,7 @@ def send_new_material_notification(student_id, course_activity, course, material
         # Send notification via channels to all enrolled students
 
         channel_layer = get_channel_layer()
-        group_name = f"new_material_notifications_{course.course_id}"
+        group_name = f"new_material_notifications_{course.course_id}_{student.user_id}"
         async_to_sync(channel_layer.group_send)(
             group_name,
             {
@@ -88,7 +88,7 @@ def send_new_activity_notification(student_id, course, activity_title):
 
         # Send notification via channels to all enrolled students
         channel_layer = get_channel_layer()
-        group_name = f"new_activity_notifications_{course.course_id}"
+        group_name = f"new_activity_notifications_{course.course_id}_{student.user_id}"
         async_to_sync(channel_layer.group_send)(
             group_name,
             {

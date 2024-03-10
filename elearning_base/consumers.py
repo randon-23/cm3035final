@@ -83,8 +83,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             
             # Student notifications
             for course_id in self.enrolled_courses:
-                material_group = f"new_material_notifications_{course_id}"
-                activity_group = f"new_activity_notifications_{course_id}"
+                material_group = f"new_material_notifications_{course_id}_{self.user.user_id}"
+                activity_group = f"new_activity_notifications_{course_id}_{self.user.user_id}"
                 await self.channel_layer.group_add(material_group, self.channel_name)
                 await self.channel_layer.group_add(activity_group, self.channel_name)
 
@@ -104,8 +104,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             
             # Student notifications
             for course_id in self.enrolled_courses:
-                material_group = f"new_material_notifications_{course_id}"
-                activity_group = f"new_activity_notifications_{course_id}"
+                material_group = f"new_material_notifications_{course_id}_{self.user.user_id}"
+                activity_group = f"new_activity_notifications_{course_id}_{self.user.user_id}"
                 await self.channel_layer.group_discard(material_group, self.channel_name)
                 await self.channel_layer.group_discard(activity_group, self.channel_name)
 

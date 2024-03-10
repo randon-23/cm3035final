@@ -69,7 +69,7 @@ class TestNotificationConsumer(TransactionTestCase):
         self.assertTrue(connected)
 
         channel_layer = get_channel_layer()
-        material_group = f"new_material_notifications_{self.course.course_id}"
+        material_group = f"new_material_notifications_{self.course.course_id}_{self.student.user_id}"
         await channel_layer.group_send(material_group, {
             "type": "new.notification",
             "message": "New material added",
@@ -91,7 +91,7 @@ class TestNotificationConsumer(TransactionTestCase):
         self.assertTrue(connected)
 
         channel_layer = get_channel_layer()
-        activity_group = f"new_activity_notifications_{self.course.course_id}"
+        activity_group = f"new_activity_notifications_{self.course.course_id}_{self.student.user_id}"
         await channel_layer.group_send(activity_group, {
             "type": "new.notification",
             "message": "New activity added",
