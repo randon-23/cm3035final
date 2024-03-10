@@ -24,6 +24,7 @@ def course_activity_notification(sender, instance, created, **kwargs):
         for student_id in student_ids:
             send_new_activity_notification.delay(student_id, instance.course.course_id, instance.activity_title)
 
+# Signal to notify all users in the public lobby about new messages, toggles the "NEW" indicator on left pane
 @receiver(post_save, sender=LobbyMessage)
 def lobby_message(sender, instance, created, **kwargs):
     if created:
