@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['cm3035final.fly.dev, 127.0.0.1, localhost']
+ALLOWED_HOSTS = ['cm3035final.fly.dev', '127.0.0.1', 'localhost']
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
