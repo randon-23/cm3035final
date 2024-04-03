@@ -1,8 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from asgiref.sync import sync_to_async
-from .models import Enrollments, LobbyMessage, UserProfile
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -53,6 +52,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     #The following is synchronous database operations
     @database_sync_to_async
     def create_lobby_message(self, message):
+        from .models import LobbyMessage
         return LobbyMessage.objects.create(
             user=self.scope["user"],
             message=message
@@ -151,6 +151,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     #Converting to list for immediate execution in async environment
     @database_sync_to_async
     def get_users_and_courses(self):
+        from .models import Enrollments
         user = self.scope["user"]
         enrolled_courses = Enrollments.objects.filter(student=user).values_list('course_id', flat=True)
         return user, list(enrolled_courses)
