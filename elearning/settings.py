@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET KEY', get_random_secret_key())
+SECRET_KEY = os.getenv('SECRET KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['cm3035final.fly.dev']
+ALLOWED_HOSTS = ['cm3035final.fly.dev, 127.0.0.1, localhost']
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -163,14 +163,15 @@ LOGIN_URL = 'login'
 SWAGGER_LOGOUT_URL = 'swagger_logout'
 
 #Celery settings
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
 
 #Channels settings
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.getenv('REDIS_URL')],
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],
         }
     }
 }

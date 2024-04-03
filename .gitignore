@@ -1,3 +1,4 @@
+.env
 venv_elearning/
 /node_modules
 /archive/
