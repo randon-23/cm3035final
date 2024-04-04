@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['cm3035final.fly.dev', '127.0.0.1', 'localhost']
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = ['https://cm3035final.fly.dev']
 SECURE_SSL_REDIRECT = False
 
 # Application definition
