@@ -1,5 +1,5 @@
 //Notification websocker set up on base_authenticated to be accessible from anywhere when user is logged in
-const notificationSocket = new WebSocket('ws://'+window.location.host+'/ws/notifications/');
+const notificationSocket = new WebSocket('wss://'+window.location.host+'/ws/notifications/');
 
 notificationSocket.onopen = function (event) {
     console.log('Notification WebSocket connected.');

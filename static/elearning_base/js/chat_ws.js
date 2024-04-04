@@ -1,4 +1,4 @@
-const chatSocket = new WebSocket('ws://'+window.location.host+'/ws/lobby/');
+const chatSocket = new WebSocket('wss://'+window.location.host+'/ws/lobby/');
 
 chatSocket.onopen = function (event) {
     console.log('Chat WebSocket connected.');
