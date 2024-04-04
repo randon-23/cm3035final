@@ -31,3 +31,7 @@ console_command = '/code/manage.py shell'
 
 [[services]]
   processes = ["app"]
+
+[[mounts]]
+  source = "media_storage"
+  destination = "/app/media"

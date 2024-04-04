@@ -112,7 +112,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 #Paths where media files are stored and served from
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Update MEDIA_ROOT to point to the mounted volume path
+MEDIA_ROOT = os.path.join('/app', 'media')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
