@@ -166,7 +166,6 @@ SWAGGER_LOGOUT_URL = 'swagger_logout'
 #Celery settings
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
-
 #Channels settings
 CHANNEL_LAYERS = {
     'default': {

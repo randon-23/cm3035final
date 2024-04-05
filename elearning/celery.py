@@ -7,6 +7,8 @@ from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'elearning.settings')
 
-app=Celery('elearning', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
+redis_url =os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+app=Celery('elearning', broker=redis_url, backend=redis_url)
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
