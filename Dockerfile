@@ -11,6 +11,12 @@ WORKDIR /code
 
 RUN apt-get update && apt-get install -y nodejs npm
 
+RUN apt-get update \
+    && apt-get install -y nginx \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+COPY nginx.conf /etc/nginx/nginx.conf
+
 COPY requirements.txt /tmp/requirements.txt
 RUN set -ex && \
     pip install --upgrade pip && \
@@ -27,4 +33,7 @@ RUN apt-get update && apt-get install -y build-essential
 
 EXPOSE 8000
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "elearning.asgi:application"]
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
